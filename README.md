@@ -1,7 +1,7 @@
 # SMART Wireless Lighting
 
 ## Introduction
-Ficsit pioneers can now control their Factory's Lights wirelessly and without the clutter of cables connecting each and every light with just the click of a button!
+Ficsit pioneers can now control their Factory's Lights wirelessly and without the clutter of cables connecting each and every light with just the click of a button! :sunglasses:
 
 ## Installation
 **Version 0.1.0 (Smart Wireless Lighting)**
