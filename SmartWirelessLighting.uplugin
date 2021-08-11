@@ -1,0 +1,35 @@
+{
+  "FileVersion": 3,
+  "Version": 0,
+  "SemVersion": "0.1.0",
+  "VersionName": "0.1.0",
+  "FriendlyName": "Smart Wireless Lighting",
+  "Description": "Smart Wireless Lighting that allows control of the built-in lights from CSS. Connect and disconnect the different lights directly from the Wireless Lights Control Panel.",
+  "Category": "Modding",
+  "CreatedBy": "iamcrouton",
+  "CreatedByURL": "",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "CanContainContent": true,
+  "IsBetaVersion": false,
+  "IsExperimentalVersion": false,
+  "Installed": false,
+  "RemoteVersionRange":  "^0.1.0",
+  "AcceptsAnyRemoteVersion": false,
+  "Modules": [
+    {
+      "Name": "SmartWirelessLighting",
+      "Type": "Runtime",
+      "LoadingPhase": "PostDefault"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "SML",
+      "SemVersion": "^3.0.0",
+      "bIsOptional": false,
+      "Enabled": true
+    }
+  ]
+}
