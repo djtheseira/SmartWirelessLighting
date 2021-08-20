@@ -1,13 +1,13 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "FGBuildableSubsystem.h"
+#include "FGCircuitConnectionComponent.h"
+#include "FGPowerConnectionComponent.h"
 #include "FGRemoteCallObject.h"
 #include "Buildables/FGBuildable.h"
 #include "Buildables/FGBuildableLightSource.h"
 #include "Buildables/FGBuildableLightsControlPanel.h"
 #include "Buildables/FGBuildableWire.h"
-#include "FGCircuitConnectionComponent.h"
-#include "FGPowerConnectionComponent.h"
 #include "Player/PlayerCommandSender.h"
 #include "SmartWirelessLightingRemoteCallObject.generated.h"
 
@@ -25,7 +25,6 @@ public:
 
 	// Begin Actor Interface
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
-	//virtual void PostInitProperties() override;
 	// End Actor Interface
 
 	/** 
@@ -34,14 +33,6 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "SmartWirelessRCO|Lights")
 	void FindAllBuildableLightSources(TArray<FBuildableLightingConnection>& BuildableLightingConnections);
-
-	/** Add a new BuildableLightSource to the LightSource array */
-	UFUNCTION(BlueprintCallable, Category = "SmartWirelessRCO|Lights")
-	void AddNewBuiltBuildableLightSource(AFGBuildableLightSource* LightSource, UPARAM(Ref)FSmartLightingBucket& SmartLightingBucket);
-
-	/** Removes a BuildableLightSource to the LightSource array */
-	UFUNCTION(BlueprintCallable, Category = "SmartWirelessRCO|Lights")
-	void RemoveBuiltBuildableLightSource(AFGBuildableLightSource* LightSource, UPARAM(Ref)FSmartLightingBucket& SmartLightingBucket);
 
 	/** 
 	* Get the available light sources in the world, weird name, but basically this updates the Buildable Lighting Connection objects with the information
