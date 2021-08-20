@@ -30,6 +30,10 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 
 # Changelog
 
+### 0.9.1:
+   
+   - Added a sort method onto the Light list, which sorts the closest Lights first.
+
 ### 0.9.0: 
 
    - Officially in beta, things are working quite nicely. 
