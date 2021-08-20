@@ -5,9 +5,15 @@
 
 Smart Wireless Lighting takes advantage of the Lighting network from Satisfactory but allows a user to manage and connect to those lights from the SMART Wireless Lighting Control Panel.
 
-![Lights Activated with SMART Lighting Panel Configuration text](https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configuration.png?raw=true)
+![Lights Activated with SMART Lighting Panel Configuration](https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configure.png?raw=true)
 
-![]()
+<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configure.png?raw=true" height="640" width="448" alt="Lights Activated with SMART Lighting Panel Configuration" />
+
+![SMART Lighting Panel Light Configuration](https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configure.png?raw=true)
+
+![SMART Lighting Panel Light Selection](https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_LightSelection.png?raw=true)
+
+![SMART Lighting Panel Build Menu](https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Menu.png?raw=true)
 
 # Features
 
