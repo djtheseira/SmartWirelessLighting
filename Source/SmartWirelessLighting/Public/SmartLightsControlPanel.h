@@ -15,6 +15,15 @@
 #include "Buildables/FGBuildableLightsControlPanel.h"
 #include "SmartLightsControlPanel.generated.h"
 
+UENUM(BlueprintType)
+enum class ELightSourceType : uint8
+{
+	LS_StreetLight UMETA(DisplayName = "Street Light"),
+	LS_CeilingLight UMETA(DisplayName = "Ceiling Light"),
+	LS_WallFloodLight UMETA(DisplayName = "Wall Flood Light"),
+	LS_PoleFloodLight UMETA(DisplayName = "Pole Flood Light")
+};
+
 USTRUCT(Blueprintable)
 struct SMARTWIRELESSLIGHTING_API FBuildableLightingConnection
 {
@@ -37,6 +46,12 @@ struct SMARTWIRELESSLIGHTING_API FBuildableLightingConnection
 
 	UPROPERTY(BlueprintReadWrite, Category = "WirelessLightsControlPanel|Lighting Connections")
 	bool mShouldShow = false;
+
+	UPROPERTY(BlueprintReadWrite, Category = "WirelessLightsControlPanel|Lighting Connections")
+	ELightSourceType mLightSourceType;
+
+	UPROPERTY(BlueprintReadWrite, Category = "WirelessLightsControlPanel|Lighting Connections")
+	float mDistanceToControlPanel = 0;
 
 	FORCEINLINE bool operator==(const AFGBuildableLightSource* LightSource) const
 	{

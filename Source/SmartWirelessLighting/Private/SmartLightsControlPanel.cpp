@@ -60,7 +60,6 @@ void ASmartLightsControlPanel::UpdateControlPanelSmartLightingBucket_Implementat
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::UpdateControlPanelSmartLightingBucket"));
 	int32 DownstreamConnectionCircuitId = Super::mDownstreamConnection->GetCircuitID();
 	UFGPowerConnectionComponent* DownstreamPowerConnection = Cast<UFGPowerConnectionComponent>(Super::mDownstreamConnection);
-
 	for (FBuildableLightingConnection LightingConnection : UpdatedSmartLightingBucket.mBuildableLightingConnections)
 	{
 		if (!LightingConnection.mBuildablePowerConnection)
@@ -89,9 +88,35 @@ void ASmartLightsControlPanel::UpdateControlPanelSmartLightingBucket_Implementat
 				LightingConnection.mBuildableWire = this->GetControlPanelToLightWire(LightingConnection.mBuildablePowerConnection);
 			}
 			LightingConnection.mShouldShow = true;
-
 		}
+
+		if (LightingConnection.mBuildableLightSource->GetName().Contains("Build_StreetLight")) 
+		{
+			LightingConnection.mLightSourceType = ELightSourceType::LS_StreetLight;
+		}
+		else if (LightingConnection.mBuildableLightSource->GetName().Contains("Build_CeilingLight")) 
+		{
+			LightingConnection.mLightSourceType = ELightSourceType::LS_CeilingLight;
+		}
+		else if (LightingConnection.mBuildableLightSource->GetName().Contains("Build_FloodlightPole")) 
+		{
+			LightingConnection.mLightSourceType = ELightSourceType::LS_PoleFloodLight;
+		}
+		else
+		{
+			LightingConnection.mLightSourceType = ELightSourceType::LS_WallFloodLight;
+		}
+
+		LightingConnection.mDistanceToControlPanel = floorf(UpdatedSmartLightingBucket.mControlPanel->GetHorizontalDistanceTo(LightingConnection.mBuildableLightSource)) / 100;
 		UpdatedSmartLightingBucket.mBuildableLightingConnections[ConnectionIndex] = LightingConnection;
+	}
+
+	if (UpdatedSmartLightingBucket.mBuildableLightingConnections.Num() > 0)
+	{
+		UpdatedSmartLightingBucket.mBuildableLightingConnections.Sort([](const FBuildableLightingConnection& A, const FBuildableLightingConnection& B)
+		{
+			return islessequal(A.mDistanceToControlPanel, B.mDistanceToControlPanel);
+		});
 	}
 	mControlPanelSmartLightingBucket = UpdatedSmartLightingBucket;
 }
@@ -104,6 +129,7 @@ void ASmartLightsControlPanel::AddBuildableLightSource_Implementation(class AFGB
 		FBuildableLightingConnection LightingConnection = FBuildableLightingConnection();
 		LightingConnection.mBuildableLightSource = LightSource;
 		LightingConnection.mShouldShow = true;
+		
 		UFGPowerConnectionComponent* LightConnection = Cast<UFGPowerConnectionComponent>(LightingConnection.mBuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
 		if (LightConnection) {
 			LightingConnection.mBuildablePowerConnection = LightConnection;
@@ -197,11 +223,6 @@ void ASmartLightsControlPanel::UpdateLightStatus_Implementation(bool LightStatus
 		}
 	}
 }
-
-/*void ASmartLightsControlPanel::OnLightingConnectionDestoryed(class AFGBuildableLightSource* LightSource)
-{
-
-}*/
 
 FSmartLightingBucket ASmartLightsControlPanel::GetControlPanelSmartLightingBucket()
 {
