@@ -1,25 +1,46 @@
 
-# SMART Wireless Lighting
-
-![Multiplayer Compatible](https://github.com/deantendo/community/blob/master/com_mp_yes.png?raw=true)
+# SMART Wireless Lighting 
 
 Smart Wireless Lighting takes advantage of the Lighting network from Satisfactory but allows a user to manage and connect to those lights from the SMART Wireless Lighting Control Panel.
 
-![Lights Activated with SMART Lighting Panel Configuration](https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configure.png?raw=true)
+![Multiplayer Compatible](https://github.com/deantendo/community/blob/master/com_mp_yes.png?raw=true)
 
-<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configure.png?raw=true" height="640" width="448" alt="Lights Activated with SMART Lighting Panel Configuration" />
+<p>
+	<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configure_640.png?raw=true" width="640" height="636" alt="Lights Activated with SMART Lighting Panel" />
+</p>
 
-![SMART Lighting Panel Light Configuration](https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configure.png?raw=true)
+<p>
+	<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configuration_640.png?raw=true" width="640" height="568" alt="SMART Lighting Panel Light Configuration" />
+</p>
 
-![SMART Lighting Panel Light Selection](https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_LightSelection.png?raw=true)
+<p>
+	<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_LightSelection_640.png?raw=true" width="640" height="757" alt="Lights Activated with SMART Lighting Panel Configuration" />
+</p>
 
-![SMART Lighting Panel Build Menu](https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Menu.png?raw=true)
+<p>
+	<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Menu_640.png?raw=true" width="640" height="299" alt="Lights Activated with SMART Lighting Panel Configuration" />
+
+</p>
 
 # Features
 
-- SMART Wireless Lighting Control Panel
+- SMART Wireless Lighting Panel
 	
 	- This panel is built off the regular Lighting Control Panel, but adds a secondary screen that displays the Lights that are not connected to any other systems and shows the Lights that are connected to the current Control Panel.
+
+# Changelog
+
+### 0.9.0: 
+
+   - Officially in beta, things are working quite nicely. 
+   - Fixed multiplayer support and essentially reworked the entire system to ensure that there wasn't a major difference between single and multiplayer. 
+   - Changed how connections are made, using a custom power line.
+   - Fixed when removing or adding a new Light, the list is properly updated.
+   - Fixed issue where destroying a SMART Lighting Panel, the Light list is updated with any Lights that were connected to the destroyed building.
+
+### 0.1.0:
+
+   - Original upload to ficsit.app, was very alpha and needed quite a bit of rework. 
 
 # Warning
 
