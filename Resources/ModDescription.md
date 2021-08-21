@@ -5,6 +5,8 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 
 ![Multiplayer Compatible](https://github.com/deantendo/community/blob/master/com_mp_yes.png?raw=true)
 
+### Unlocked in the Resource Sink Shop in the Organization section where the other Lighting buildables are located. BUT ITS FREEEEEE
+
 <p>
 	<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configure_640.png?raw=true" width="640" height="636" alt="Lights Activated with SMART Lighting Panel" />
 </p>
@@ -29,6 +31,11 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 	- This panel is built off the regular Lighting Control Panel, but adds a secondary screen that displays the Lights that are not connected to any other systems and shows the Lights that are connected to the current Control Panel.
 
 # Changelog
+
+### 0.9.2:
+   - Changed location of item in the Resource Sink Shop.
+   - Fixed the Lights selection boxes so that they're ACTUALLY scrollable.
+   - Changed the sorting on Lights so that the ones that are connected are displayed first as well.
 
 ### 0.9.1:
    

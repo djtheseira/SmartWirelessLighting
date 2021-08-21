@@ -115,6 +115,12 @@ void ASmartLightsControlPanel::UpdateControlPanelSmartLightingBucket_Implementat
 	{
 		UpdatedSmartLightingBucket.mBuildableLightingConnections.Sort([](const FBuildableLightingConnection& A, const FBuildableLightingConnection& B)
 		{
+			if (!A.isConnected) {
+				return false;
+			}
+			else if (!B.isConnected) {
+				return true;
+			}
 			return islessequal(A.mDistanceToControlPanel, B.mDistanceToControlPanel);
 		});
 	}
