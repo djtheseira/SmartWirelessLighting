@@ -32,6 +32,9 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 
 # Changelog
 
+### 0.9.4:
+   - I didn't update the RemoteVersionRange, so client couldn't connect to a host when using this mod. Pushing this ASAP so multiplayer actually works.
+
 ### 0.9.3:
    - The sorting I added in .2 messed up the original sorting, so swapped the logic.
 
