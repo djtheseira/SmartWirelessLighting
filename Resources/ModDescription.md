@@ -8,29 +8,44 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 ### Unlocked in the Resource Sink Shop in the Organization section where the other Lighting buildables are located. BUT ITS FREEEEEE
 
 <p>
-	<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configure_640.png?raw=true" width="640" height="636" alt="Lights Activated with SMART Lighting Panel" />
+   <img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configure_640.png?raw=true" width="640" height="636" alt="Lights Activated with SMART Lighting Panel" />
 </p>
 
 <p>
-	<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configuration_640.png?raw=true" width="640" height="568" alt="SMART Lighting Panel Light Configuration" />
+   <img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Configuration_640.png?raw=true" width="640" height="568" alt="SMART Lighting Panel Light Configuration" />
 </p>
 
 <p>
-	<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_LightSelection_640.png?raw=true" width="640" height="757" alt="Lights Activated with SMART Lighting Panel Configuration" />
+   <img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_LightSelection_640.png?raw=true" width="640" height="757" alt="Lights Activated with SMART Lighting Panel Configuration" />
 </p>
 
 <p>
-	<img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Menu_640.png?raw=true" width="640" height="299" alt="Lights Activated with SMART Lighting Panel Configuration" />
+   <img src="https://github.com/djtheseira/SmartWirelessLighting/blob/main/Resources/SMARTLP_Menu_640.png?raw=true" width="640" height="299" alt="Lights Activated with SMART Lighting Panel Configuration" />
 
 </p>
 
 # Features
 
 - SMART Wireless Lighting Panel
-	
-	- This panel is built off the regular Lighting Control Panel, but adds a secondary screen that displays the Lights that are not connected to any other systems and shows the Lights that are connected to the current Control Panel.
+   
+   - This panel is built off the regular Lighting Control Panel, but adds a secondary screen that displays the Lights that are not connected to any other systems and shows the Lights that are connected to the current Control Panel.
+
+# Known Issues
+
+   - When connecting/disconnecting a light from a normal cable, the light list will not update. (Fix coming soon)
+   - Daisy chaining doesn't work. The SMART wireless light panel ignores a light with a connection (for now). The issue above can also cause an issue where the light either appears or disappears after a different refresh. The daisy chaining with cables issue will be addressed ASAP, but the first issue is my current priority.
+
+# New Features
+
+   - Add a map to help identify which lights can be connected to as well as which are currently connected.
+   - Add ability to change names of lights like trains naming system (maybe..)
 
 # Changelog
+
+### 0.9.5
+   - Fixed distance always set to 0m after building a light.
+   - Fixed issue that happened when disconnecting from a light, it wouldn't clear out the connection and the light would think it didn't have free connections.
+   - Fixed Light list not updating when a different SMART Control Panel connected/disconnected from a light.
 
 ### 0.9.4:
    - I didn't update the RemoteVersionRange, so client couldn't connect to a host when using this mod. Pushing this ASAP so multiplayer actually works.

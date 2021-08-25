@@ -9,6 +9,7 @@
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"
 #include "FGUseableInterface.h"
+#include "Logging.h"
 #include "Buildables/FGBuildable.h"
 #include "Buildables/FGBuildableWire.h"
 #include "Buildables/FGBuildableLightSource.h"
@@ -81,7 +82,6 @@ struct SMARTWIRELESSLIGHTING_API FSmartLightingBucket
 
 	UPROPERTY(BlueprintReadWrite, Category = "WirelessLightsControlPanel|Lighting Connections")
 	int32 mDirtyIndex;
-
 };
 
 /**
@@ -108,22 +108,25 @@ public:
 	virtual void PreUpgrade_Implementation() override;*/
 	//~ End IFGDismantleInterface
 
+	UFUNCTION(BlueprintCallable, Category = "WirelessLightsControlPanel|LightPanel")
+	void SetupVariables(class UFGCircuitConnectionComponent* DownstreamConnection, class ASmartLightsControlPanel* ControlPanel, UPARAM(ref)TArray<FBuildableLightingConnection>& BuildableLightingConnections);
+
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "WirelessLightsControlPanel|LightPanel")
-	void UpdateControlPanelSmartLightingBucket(FSmartLightingBucket UpdatedSmartLightingBucket);
+	void RefreshControlPanelBucket();
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "WirelessLightsControlPanel|LightPanel")
 	void AddBuildableLightSource(class AFGBuildableLightSource* LightSource);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "WirelessLightsControlPanel|LightPanel")
 	void RemoveBuildableLightSource(class AFGBuildableLightSource* LightSource);
-
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "WirelessLightsControlPanel|LightPanel")
-	void AddControlPanelDownstreamConnectionToSmartLightingBucket(class UFGCircuitConnectionComponent* DownstreamConnection);
-
+	
 	UFUNCTION(BlueprintCallable, Category = "WirelessLightsControlPanel|LightPanel")
 	void AddLightingConnectionToControlPanel(FBuildableLightingConnection BuildableLightingConnection);
 
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "WirelessLightsControlPanel|LightPanel")
+	UFUNCTION(Server, Unreliable)
+	void UpdateLightingConnection(FBuildableLightingConnection LightingConnection);
+
+	UFUNCTION(BlueprintCallable, Server, Client, Reliable, Category = "WirelessLightsControlPanel|LightPanel")
 	void UpdateLightControlData(FLightSourceControlData data);
 
 	UFUNCTION(BlueprintCallable, Category = "WirelessLightsControlPanel|LightPanel")
@@ -132,13 +135,12 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "WirelessLightsControlPanel|LightPanel")
 	void UpdateLightStatus(bool LightStatus);
 
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "WirelessLightsControlPanel|LightPanel")
+	void SetIsDirtyList();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "WirelessLightsControlPanel|LightPanel")
 	void OnLightingConnectionDestoryed(AActor* destoryedActor);
-
-	/** Get the control panel SmartLightingBucket, valid on client. */
-	UFUNCTION(BlueprintCallable, Category = "WirelessLightsControlPanel|LightPanel", meta = (DisplayName = "GetLightingBucket", CompactNodeTitle = "SmartLightingBucket" ))
-	FSmartLightingBucket GetControlPanelSmartLightingBucket();
-
+	
 	UFUNCTION(BlueprintCallable, Category = "WirelessLightsControlPanel|LightPanel", meta = (DisplayName = "GetLightingConnections", CompactNodeTitle = "BuildableLightingConnections" ))
 	TArray<FBuildableLightingConnection>& GetBuildableLightingConnections();
 
@@ -148,17 +150,40 @@ public:
 	UFUNCTION(BlueprintPure, Category = "WirelessLightsControlPanel|LightPanel", meta = (DisplayName = "GetLightingConnectionIndex", CompactNodeTitle = "ConnectionIndex" ))
 	int32 GetLightingConnectionIndex(FBuildableLightingConnection BuildableLightingConnection);
 
+	UFUNCTION(BlueprintPure, Category = "WirelessLightsControlPanel|LightPanel", meta = (DisplayName = "IsDirtyList", CompactNodeTitle = "IsDirtyList"))
+	bool GetIsDirtyList();
+
+
 protected:
+
 	UFUNCTION()
-	void OnRep_ControlPanelLightingBucketUpdated();
+	void OnRep_ControlPanelBuildableLightingConnections();
+
+	UFUNCTION()
+	void OnRep_ControlPanel();
+	
+	UFUNCTION()
+	void OnRep_DirtyIndex();
+
+	UFUNCTION()
+	void OnRep_IsDirtyList();
 	
 private:
 
-	UPROPERTY(ReplicatedUsing = "OnRep_ControlPanelLightingBucketUpdated" )
-	FSmartLightingBucket mControlPanelSmartLightingBucket;
-
 	UPROPERTY(Replicated)
 	bool mIsFirstUpdate = true;
+
+	UPROPERTY(ReplicatedUsing = "OnRep_ControlPanelBuildableLightingConnections")
+	TArray<FBuildableLightingConnection> mBuildableLightingConnections;
+
+	UPROPERTY(ReplicatedUsing = "OnRep_ControlPanel")
+	class ASmartLightsControlPanel* mControlPanel;
+
+	UPROPERTY(ReplicatedUsing = "OnRep_DirtyIndex")
+	int32 mDirtyIndex;
+
+	UPROPERTY(ReplicatedUsing = "OnRep_IsDirtyList")
+	bool mIsDirtyList;
 	
 	class AFGCircuitSubsystem* mCircuitSubsystem;
 	
@@ -171,10 +196,31 @@ private:
 		PowerConnection->GetWires(ConnectedWires);
 		for (AFGBuildableWire* Wire : ConnectedWires) {
 			UFGCircuitConnectionComponent* OppositeCircuitConnection = Wire->GetOppositeConnection(PowerConnection);
-			if (OppositeCircuitConnection && OppositeCircuitConnection == mControlPanelSmartLightingBucket.mDownstreamConnection) {
+			if (OppositeCircuitConnection && OppositeCircuitConnection == this->mDownstreamConnection) {
 				return Wire;
 			}
 		}
 		return nullptr;
 	}
+
+	ELightSourceType GetBuildableLightSourceType(FString LightSourceName)
+	{
+		if (LightSourceName.Contains("Build_StreetLight"))
+		{
+			return ELightSourceType::LS_StreetLight;
+		}
+		else if (LightSourceName.Contains("Build_CeilingLight"))
+		{
+			return ELightSourceType::LS_CeilingLight;
+		}
+		else if (LightSourceName.Contains("Build_FloodlightPole"))
+		{
+			return ELightSourceType::LS_PoleFloodLight;
+		}
+		else
+		{
+			return ELightSourceType::LS_WallFloodLight;
+		}
+	}
+
 };

@@ -4,6 +4,7 @@
 #include "FGCircuitConnectionComponent.h"
 #include "FGPowerConnectionComponent.h"
 #include "FGRemoteCallObject.h"
+#include "SmartLightsControlPanel.h"
 #include "Buildables/FGBuildable.h"
 #include "Buildables/FGBuildableLightSource.h"
 #include "Buildables/FGBuildableLightsControlPanel.h"
@@ -42,17 +43,20 @@ public:
 	void UpdateLightControlPanelBuildableLightSources(UPARAM(Ref)FSmartLightingBucket& SmartLightingBucket);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO|Lights")
-	void AddLightConnection(FBuildableLightingConnection BuildableLightingConnection, FSmartLightingBucket SmartLightingBucket);
+	void Server_RefreshLightControlPanelBucket(class ASmartLightsControlPanel* mControlPanel, FBuildableLightingConnection BuildableLightingConnection);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO|Lights")
-	void RemoveLightConnection(FBuildableLightingConnection BuildableLightingConnection, FSmartLightingBucket SmartLightingBucket);
+	void AddLightConnection(FBuildableLightingConnection BuildableLightingConnection, class ASmartLightsControlPanel* mControlPanel);
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO|Lights")
+	void RemoveLightConnection(FBuildableLightingConnection BuildableLightingConnection, class ASmartLightsControlPanel* mControlPanel);
 
 	/** Update the Light Source's Light Control Data */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO|Lights")
-	void UpdateLightControlData(FSmartLightingBucket SmartLightingBucket, FLightSourceControlData LightControlData);
+	void UpdateLightControlData(class ASmartLightsControlPanel* mControlPanel, FLightSourceControlData LightControlData);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO|Lights")
-	void UpdateControlPanelStatus(FSmartLightingBucket SmartLightingBucket, bool IsEnabled);
+	void UpdateControlPanelStatus(class ASmartLightsControlPanel* mControlPanel, bool IsEnabled);
 
 	UFUNCTION(BlueprintCallable, Category = "SmartWirelessRCO|Debug")
 	void DebugWirelessLightingRCO(FString Location);

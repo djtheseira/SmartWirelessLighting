@@ -15,26 +15,28 @@
 ASmartLightsControlPanel::ASmartLightsControlPanel() : Super() 
 {
 	this->SetReplicates(true);
+	this->bReplicates = true;
 	this->NetDormancy = DORM_Initial;
 	this->NetCullDistanceSquared = 5624999936;
 	this->mHighlightParticleClassName = FSoftClassPath("/Game/FactoryGame/Buildable/-Shared/Particle/NewBuildingPing.NewBuildingPing_C");
 	this->mDismantleEffectClassName = FSoftClassPath("/Game/FactoryGame/Buildable/Factory/-Shared/BP_MaterialEffect_Dismantle.BP_MaterialEffect_Dismantle_C");
 	this->mBuildEffectClassName = FSoftClassPath("/Game/FactoryGame/Buildable/Factory/-Shared/BP_MaterialEffect_Build.BP_MaterialEffect_Build_C");
-	SetReplicates(true);
-	bReplicates = true;
 }
 
 void ASmartLightsControlPanel::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ASmartLightsControlPanel, mControlPanelSmartLightingBucket);
+	//DOREPLIFETIME(ASmartLightsControlPanel, mControlPanelSmartLightingBucket);
 	DOREPLIFETIME(ASmartLightsControlPanel, mIsFirstUpdate);
+	DOREPLIFETIME(ASmartLightsControlPanel, mIsDirtyList);
+	DOREPLIFETIME(ASmartLightsControlPanel, mBuildableLightingConnections);
+	DOREPLIFETIME(ASmartLightsControlPanel, mControlPanel);
 }
 
 void ASmartLightsControlPanel::OnDismantleEffectFinished()
 {
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnDismantleEffectFinished"));
-	for (FBuildableLightingConnection LightingConnection : mControlPanelSmartLightingBucket.mBuildableLightingConnections)
+	for (FBuildableLightingConnection LightingConnection : this->mBuildableLightingConnections)
 	{
 		if (LightingConnection.mBuildableWire && LightingConnection.isConnected)
 		{
@@ -55,12 +57,24 @@ void ASmartLightsControlPanel::BeginPlay()
 	}
 }
 
-void ASmartLightsControlPanel::UpdateControlPanelSmartLightingBucket_Implementation(FSmartLightingBucket UpdatedSmartLightingBucket)
+void ASmartLightsControlPanel::SetupVariables(class UFGCircuitConnectionComponent* DownstreamConnection, class ASmartLightsControlPanel* ControlPanel, TArray<FBuildableLightingConnection>& BuildableLightingConnections)
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::UpdateControlPanelSmartLightingBucket"));
-	int32 DownstreamConnectionCircuitId = Super::mDownstreamConnection->GetCircuitID();
-	UFGPowerConnectionComponent* DownstreamPowerConnection = Cast<UFGPowerConnectionComponent>(Super::mDownstreamConnection);
-	for (FBuildableLightingConnection LightingConnection : UpdatedSmartLightingBucket.mBuildableLightingConnections)
+	if (HasAuthority()) 
+	{
+		mDownstreamConnection = DownstreamConnection;
+		mControlPanel = ControlPanel;
+		mBuildableLightingConnections = BuildableLightingConnections;
+		this->RefreshControlPanelBucket();
+	}
+}
+
+void ASmartLightsControlPanel::RefreshControlPanelBucket_Implementation()
+{
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RefreshControlPanelBucket Start ControlPanel: %s %d"), *mControlPanel->GetName(), mBuildableLightingConnections.Num());
+	int32 DownstreamConnectionCircuitId = mDownstreamConnection->GetCircuitID();
+	UFGPowerConnectionComponent* DownstreamPowerConnection = Cast<UFGPowerConnectionComponent>(mDownstreamConnection);
+	TArray<FBuildableLightingConnection> NewBuildableLightingConnections = mBuildableLightingConnections;
+	for (FBuildableLightingConnection LightingConnection : NewBuildableLightingConnections)
 	{
 		if (!LightingConnection.mBuildablePowerConnection)
 		{
@@ -74,46 +88,32 @@ void ASmartLightsControlPanel::UpdateControlPanelSmartLightingBucket_Implementat
 
 		TArray< UFGCircuitConnectionComponent* >& LightConnections = *(new TArray< UFGCircuitConnectionComponent*>);
 		LightingConnection.mBuildablePowerConnection->GetConnections(LightConnections);
-		
-		int32 ConnectionIndex = UpdatedSmartLightingBucket.mBuildableLightingConnections.Find(LightingConnection);
-		if (LightingConnection.mBuildablePowerConnection->GetCircuitID() > -1 &&  !LightConnections.Contains(Super::mDownstreamConnection))
+
+		int32 ConnectionIndex = NewBuildableLightingConnections.Find(LightingConnection);
+		if (LightingConnection.mBuildablePowerConnection->GetCircuitID() > -1 && !LightConnections.Contains(this->mDownstreamConnection))
 		{
 			LightingConnection.mShouldShow = false;
 			LightingConnection.isConnected = false;
-		} 
-		else 
+		}
+		else
 		{
-			LightingConnection.isConnected = LightConnections.Contains(Super::mDownstreamConnection);
+			LightingConnection.isConnected = LightConnections.Contains(mDownstreamConnection);
 			if (LightingConnection.isConnected) {
 				LightingConnection.mBuildableWire = this->GetControlPanelToLightWire(LightingConnection.mBuildablePowerConnection);
 			}
 			LightingConnection.mShouldShow = true;
 		}
-
-		if (LightingConnection.mBuildableLightSource->GetName().Contains("Build_StreetLight")) 
-		{
-			LightingConnection.mLightSourceType = ELightSourceType::LS_StreetLight;
-		}
-		else if (LightingConnection.mBuildableLightSource->GetName().Contains("Build_CeilingLight")) 
-		{
-			LightingConnection.mLightSourceType = ELightSourceType::LS_CeilingLight;
-		}
-		else if (LightingConnection.mBuildableLightSource->GetName().Contains("Build_FloodlightPole")) 
-		{
-			LightingConnection.mLightSourceType = ELightSourceType::LS_PoleFloodLight;
-		}
-		else
-		{
-			LightingConnection.mLightSourceType = ELightSourceType::LS_WallFloodLight;
-		}
-
-		LightingConnection.mDistanceToControlPanel = floorf(UpdatedSmartLightingBucket.mControlPanel->GetHorizontalDistanceTo(LightingConnection.mBuildableLightSource)) / 100;
-		UpdatedSmartLightingBucket.mBuildableLightingConnections[ConnectionIndex] = LightingConnection;
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RefreshControlPanelBucket %s: %s conn; %s show"), *LightingConnection.mBuildableLightSource->GetName(), LightingConnection.isConnected ? TEXT("is") : TEXT("is not"), LightingConnection.mShouldShow ? TEXT("should") : TEXT("should not"));
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RefreshControlPanelBucket %s: circuitid: %d"), *LightingConnection.mBuildableLightSource->GetName(), LightingConnection.mBuildablePowerConnection->GetCircuitID());
+		LightingConnection.mLightSourceType = this->GetBuildableLightSourceType(LightingConnection.mBuildableLightSource->GetName());
+		LightingConnection.mDistanceToControlPanel = floorf(mControlPanel->GetHorizontalDistanceTo(LightingConnection.mBuildableLightSource)) / 100;
+		NewBuildableLightingConnections[ConnectionIndex] = LightingConnection;
+		//mBuildableLightingConnections.Insert(LightingConnection, ConnectionIndex);
 	}
 
-	if (UpdatedSmartLightingBucket.mBuildableLightingConnections.Num() > 0)
+	if (NewBuildableLightingConnections.Num() > 0)
 	{
-		UpdatedSmartLightingBucket.mBuildableLightingConnections.Sort([](const FBuildableLightingConnection& A, const FBuildableLightingConnection& B)
+		NewBuildableLightingConnections.Sort([](const FBuildableLightingConnection& A, const FBuildableLightingConnection& B)
 		{
 			if (A.isConnected) {
 				return true;
@@ -124,7 +124,9 @@ void ASmartLightsControlPanel::UpdateControlPanelSmartLightingBucket_Implementat
 			return islessequal(A.mDistanceToControlPanel, B.mDistanceToControlPanel);
 		});
 	}
-	mControlPanelSmartLightingBucket = UpdatedSmartLightingBucket;
+	mBuildableLightingConnections = NewBuildableLightingConnections;
+	mIsDirtyList = false;
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RefreshControlPanelBucket Finished ControlPanel: %s %d"), *mControlPanel->GetName(), mBuildableLightingConnections.Num());
 }
 
 void ASmartLightsControlPanel::AddBuildableLightSource_Implementation(class AFGBuildableLightSource* LightSource)
@@ -134,86 +136,111 @@ void ASmartLightsControlPanel::AddBuildableLightSource_Implementation(class AFGB
 	{
 		FBuildableLightingConnection LightingConnection = FBuildableLightingConnection();
 		LightingConnection.mBuildableLightSource = LightSource;
-		LightingConnection.mShouldShow = true;
-		
+		LightingConnection.mLightSourceType = this->GetBuildableLightSourceType(LightingConnection.mBuildableLightSource->GetName());
+		LightingConnection.mDistanceToControlPanel = floorf(mControlPanel->GetHorizontalDistanceTo(LightingConnection.mBuildableLightSource)) / 100;
 		UFGPowerConnectionComponent* LightConnection = Cast<UFGPowerConnectionComponent>(LightingConnection.mBuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
 		if (LightConnection) {
 			LightingConnection.mBuildablePowerConnection = LightConnection;
+			LightingConnection.mShouldShow = LightConnection->GetNumConnections() == 0;
 		}
-		int32 DirtyIndex = mControlPanelSmartLightingBucket.mBuildableLightingConnections.Add(LightingConnection);
-		mControlPanelSmartLightingBucket.mDirtyIndex = DirtyIndex;
+		int32 DirtyIndex = mBuildableLightingConnections.Add(LightingConnection);
+		mDirtyIndex = DirtyIndex;
 	}
 }
 
 void ASmartLightsControlPanel::RemoveBuildableLightSource_Implementation(class AFGBuildableLightSource* LightSource)
 {
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RemoveBuildableLightSource"));
-	if (mControlPanelSmartLightingBucket.mBuildableLightingConnections.Num() > 0) 
+	if (mBuildableLightingConnections.Num() > 0) 
 	{
-		int32 KeyIndex = mControlPanelSmartLightingBucket.mBuildableLightingConnections.IndexOfByKey(LightSource);
+		int32 KeyIndex = mBuildableLightingConnections.IndexOfByKey(LightSource);
 		if (KeyIndex > -1) {
-			if (mControlPanelSmartLightingBucket.mBuildableLightingConnections[KeyIndex].mBuildableWire)
+			if (mBuildableLightingConnections[KeyIndex].mBuildableWire)
 			{
-				mControlPanelSmartLightingBucket.mBuildableLightingConnections[KeyIndex].mBuildableWire->TurnOffAndDestroy();
-				mControlPanelSmartLightingBucket.mBuildableLightingConnections[KeyIndex].mBuildableWire->Destroy(true);
+				mBuildableLightingConnections[KeyIndex].mBuildableWire->TurnOffAndDestroy();
+				mBuildableLightingConnections[KeyIndex].mBuildableWire->Destroy(true);
 			}
-			mControlPanelSmartLightingBucket.mBuildableLightingConnections.RemoveAt(KeyIndex, 1, true);
+
+			mBuildableLightingConnections.RemoveAt(KeyIndex, 1, true);
 		}
 	}
 }
 
-void ASmartLightsControlPanel::AddControlPanelDownstreamConnectionToSmartLightingBucket_Implementation(class UFGCircuitConnectionComponent* DownstreamConnection)
-{
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddControlPanelDownstreamConnectionToSmartLightingBucket"));
-	mControlPanelSmartLightingBucket.mDownstreamConnection = DownstreamConnection;
-}
-
 void ASmartLightsControlPanel::AddLightingConnectionToControlPanel(FBuildableLightingConnection BuildableLightingConnection)
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightingConnectionToControlPanel"));
-	if (HasAuthority() && mCircuitSubsystem) 
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightingConnectionToControlPanel Start %s %d"), *BuildableLightingConnection.mBuildableLightSource->GetName(), BuildableLightingConnection.mBuildablePowerConnection->GetCircuitID());
+	if (HasAuthority() && mCircuitSubsystem && BuildableLightingConnection.mBuildablePowerConnection->GetNumFreeConnections() > 0)
 	{
 		ABuild_SmartWirelessWireBase* NewBuildableWire = GetWorld()->SpawnActor<ABuild_SmartWirelessWireBase>(ABuild_SmartWirelessWireBase::StaticClass(), FTransform(BuildableLightingConnection.mBuildablePowerConnection->GetRelativeLocation()));
-		int32 BuildableConnectionIndex = mControlPanelSmartLightingBucket.mBuildableLightingConnections.Find(BuildableLightingConnection);
+		int32 BuildableConnectionIndex = mBuildableLightingConnections.Find(BuildableLightingConnection);
 		//mCircuitSubsystem->ConnectComponents(BuildableLightingConnection.mBuildablePowerConnection, Super::mDownstreamConnection);
 		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightingConnectionToControlPanel power conn CircuitGroupId: %d"), BuildableLightingConnection.mBuildablePowerConnection->GetPowerCircuit()->GetCircuitGroupID());
 		NewBuildableWire->Connect(BuildableLightingConnection.mBuildablePowerConnection, Super::mDownstreamConnection);
 		BuildableLightingConnection.mBuildableWire = NewBuildableWire;
-		BuildableLightingConnection.mBuildableLightSource->SetLightEnabled(mControlPanelSmartLightingBucket.mControlPanel->IsLightEnabled());
-		BuildableLightingConnection.mBuildableLightSource->SetLightControlData(mControlPanelSmartLightingBucket.mControlPanel->GetLightControlData());
+		BuildableLightingConnection.mBuildableLightSource->SetLightEnabled(mControlPanel->IsLightEnabled());
+		BuildableLightingConnection.mBuildableLightSource->SetLightControlData(mControlPanel->GetLightControlData());
 		BuildableLightingConnection.isConnected = true;
 		BuildableLightingConnection.mShouldShow = true;
-		mControlPanelSmartLightingBucket.mDirtyIndex = BuildableConnectionIndex;
-		mControlPanelSmartLightingBucket.mBuildableLightingConnections[BuildableConnectionIndex] = BuildableLightingConnection;
+		mDirtyIndex = BuildableConnectionIndex;
+		mBuildableLightingConnections[BuildableConnectionIndex] = BuildableLightingConnection;
+		mIsDirtyList = true;
+		OnRep_ControlPanelBuildableLightingConnections();
 	}
+
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightingConnectionToControlPanel End %s %d"), *BuildableLightingConnection.mBuildableLightSource->GetName(), BuildableLightingConnection.mBuildablePowerConnection->GetCircuitID());
 }
 
 void ASmartLightsControlPanel::RemoveLightingConnectionToControlPanel(FBuildableLightingConnection BuildableLightingConnection)
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RemoveLightingConnectionToControlPanel"));
-	
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RemoveLightingConnectionToControlPanel Start %s %d"), *BuildableLightingConnection.mBuildableLightSource->GetName(), BuildableLightingConnection.mBuildablePowerConnection->GetCircuitID());
 	if (HasAuthority())
 	{
-		int32 BuildableConnectionIndex = mControlPanelSmartLightingBucket.mBuildableLightingConnections.Find(BuildableLightingConnection);
+		int32 BuildableConnectionIndex = mBuildableLightingConnections.Find(BuildableLightingConnection);
+		mCircuitSubsystem->DisconnectComponents(mDownstreamConnection, BuildableLightingConnection.mBuildablePowerConnection);
+		if (!BuildableLightingConnection.mBuildableWire)
+		{
+			AFGBuildableWire* BuildableWire = GetControlPanelToLightWire(BuildableLightingConnection.mBuildablePowerConnection);
+			if (BuildableWire) 
+			{
+				BuildableLightingConnection.mBuildableWire = BuildableWire;
+			}
+		}
+
 		if (BuildableLightingConnection.mBuildableWire) {
 			BuildableLightingConnection.mBuildableWire->Disconnect();
-			BuildableLightingConnection.mBuildablePowerConnection->RemoveConnection(BuildableLightingConnection.mBuildableWire);BuildableLightingConnection.mBuildableWire->TurnOffAndDestroy();
+			BuildableLightingConnection.mBuildableWire->TurnOffAndDestroy();
 			BuildableLightingConnection.mBuildableWire->Destroy(true);
 		}
 		BuildableLightingConnection.mBuildableLightSource->SetLightEnabled(false);
 		BuildableLightingConnection.isConnected = false;
 		BuildableLightingConnection.mShouldShow = true;
 		BuildableLightingConnection.mBuildableWire = nullptr;
-		mControlPanelSmartLightingBucket.mBuildableLightingConnections[BuildableConnectionIndex] = BuildableLightingConnection;
-		mControlPanelSmartLightingBucket.mDirtyIndex = BuildableConnectionIndex;
+		mBuildableLightingConnections[BuildableConnectionIndex] = BuildableLightingConnection;
+		mDirtyIndex = BuildableConnectionIndex;
+		mIsDirtyList = true;
+		OnRep_ControlPanelBuildableLightingConnections();
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RemoveLightingConnectionToControlPanel End %s max conns: %d num conns: %d, num free conns: %d"), *BuildableLightingConnection.mBuildableLightSource->GetName(), BuildableLightingConnection.mBuildablePowerConnection->GetMaxNumConnections(), BuildableLightingConnection.mBuildablePowerConnection->GetNumConnections(), BuildableLightingConnection.mBuildablePowerConnection->GetNumFreeConnections());
 	}
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RemoveLightingConnectionToControlPanel End %s %d"), *BuildableLightingConnection.mBuildableLightSource->GetName(), BuildableLightingConnection.mBuildablePowerConnection->GetCircuitID());
+}
+
+void ASmartLightsControlPanel::UpdateLightingConnection_Implementation(FBuildableLightingConnection LightingConnection)
+{
+	int32 ConnectionIndex = mBuildableLightingConnections.Find(LightingConnection);
+	LightingConnection.mShouldShow = !mBuildableLightingConnections[ConnectionIndex].mShouldShow;
+	LightingConnection.isConnected = !mBuildableLightingConnections[ConnectionIndex].isConnected;
+	if (!LightingConnection.isConnected)
+	{
+		LightingConnection.mBuildableWire = nullptr;
+	}
+	mBuildableLightingConnections[ConnectionIndex] = LightingConnection;
 }
 
 void ASmartLightsControlPanel::UpdateLightControlData_Implementation(FLightSourceControlData data)
 {
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::UpdateLightControlData"));
-	mControlPanelSmartLightingBucket.mControlPanel->SetLightControlData(data);
-	for (FBuildableLightingConnection BuildableLightingConnection : mControlPanelSmartLightingBucket.mBuildableLightingConnections) {
+	mControlPanel->SetLightControlData(data);
+	for (FBuildableLightingConnection BuildableLightingConnection : mBuildableLightingConnections) {
 		if (BuildableLightingConnection.isConnected) {
 			BuildableLightingConnection.mBuildableLightSource->SetLightControlData(data);
 		}
@@ -222,38 +249,75 @@ void ASmartLightsControlPanel::UpdateLightControlData_Implementation(FLightSourc
 
 void ASmartLightsControlPanel::UpdateLightStatus_Implementation(bool LightStatus)
 {
-	mControlPanelSmartLightingBucket.mControlPanel->SetLightEnabled(LightStatus);
-	for (FBuildableLightingConnection BuildableLightingConnection : mControlPanelSmartLightingBucket.mBuildableLightingConnections) {
+	mControlPanel->SetLightEnabled(LightStatus);
+	for (FBuildableLightingConnection BuildableLightingConnection : mBuildableLightingConnections) {
 		if (BuildableLightingConnection.isConnected) {
 			BuildableLightingConnection.mBuildableLightSource->SetLightEnabled(LightStatus);
 		}
 	}
 }
 
-FSmartLightingBucket ASmartLightsControlPanel::GetControlPanelSmartLightingBucket()
+void ASmartLightsControlPanel::SetIsDirtyList_Implementation()
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetControlPanelSmartLightingBucket Num %d"), mControlPanelSmartLightingBucket.mBuildableLightingConnections.Num());
-	return mControlPanelSmartLightingBucket;
+	if (HasAuthority()) {
+		mIsDirtyList = true;
+	}
 }
+
+//FSmartLightingBucket ASmartLightsControlPanel::GetControlPanelSmartLightingBucket()
+//{
+//	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetControlPanelSmartLightingBucket Num %d"), mControlPanelSmartLightingBucket.mBuildableLightingConnections.Num());
+//	return mControlPanelSmartLightingBucket;
+//}
 
 int32 ASmartLightsControlPanel::GetLightingConnectionIndex(FBuildableLightingConnection BuildableLightingConnection)
 {
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RemoveLightingConnectionToControlPanel GetLightingConnectionIndex"));
-	return mControlPanelSmartLightingBucket.mBuildableLightingConnections.Find(BuildableLightingConnection);
+	return mBuildableLightingConnections.Find(BuildableLightingConnection);
 }
 
 TArray<FBuildableLightingConnection>& ASmartLightsControlPanel::GetBuildableLightingConnections()
 {
-	return mControlPanelSmartLightingBucket.mBuildableLightingConnections;
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetBuildableLightingConnections"));
+	if (mIsDirtyList && HasAuthority()) {
+		RefreshControlPanelBucket();
+	}
+	return mBuildableLightingConnections;
 }
 
 FBuildableLightingConnection ASmartLightsControlPanel::GetDirtyLightingConnection()
 {
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetDirtyLightingConnection"));
-	return mControlPanelSmartLightingBucket.mBuildableLightingConnections[mControlPanelSmartLightingBucket.mDirtyIndex];
+	return mBuildableLightingConnections[mDirtyIndex];
 }
 
-void ASmartLightsControlPanel::OnRep_ControlPanelLightingBucketUpdated()
+bool ASmartLightsControlPanel::GetIsDirtyList()
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnRep_ControlPanelLightingBucketUpdated"));
+	return mIsDirtyList;
+}
+
+//void ASmartLightsControlPanel::OnRep_ControlPanelLightingBucketUpdated()
+//{
+//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnRep_ControlPanelLightingBucketUpdated %s"), *mControlPanelSmartLightingBucket.mControlPanel->GetName());
+//}
+
+void ASmartLightsControlPanel::OnRep_DirtyIndex()
+{
+
+}
+
+void ASmartLightsControlPanel::OnRep_ControlPanelBuildableLightingConnections()
+{
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnRep_ControlPanelBuildableLightingConnections %s"), HasAuthority() ? TEXT("auth") : TEXT("remote"));
+	mIsDirtyList = true;
+}
+
+void ASmartLightsControlPanel::OnRep_ControlPanel()
+{
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnRep_ControlPanel %s"), *mControlPanel->GetName());
+}
+
+void ASmartLightsControlPanel::OnRep_IsDirtyList()
+{
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnRep_IsDirtyList %s"), *mControlPanel->GetName());
 }

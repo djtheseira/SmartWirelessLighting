@@ -8,16 +8,16 @@
 #include "FGPowerInfoComponent.h"
 #include "FGRemoteCallObject.h"
 #include "FGWorldSettings.h"
+#include "GameFramework/Actor.h"
+#include "Hologram/FGWireHologram.h"
 #include "Logging.h"
+#include "Net/UnrealNetwork.h"
+#include "Registry/RemoteCallObjectRegistry.h"
+#include "SmartLightsControlPanel.h"
 #include "Buildables/FGBuildable.h"
 #include "Buildables/FGBuildableWire.h"
 #include "Buildables/FGBuildableLightSource.h"
 #include "Buildables/FGBuildableLightsControlPanel.h"
-#include "GameFramework/Actor.h"
-#include "Hologram/FGWireHologram.h"
-#include "Net/UnrealNetwork.h"
-#include "Registry/RemoteCallObjectRegistry.h"
-
 
 USmartWirelessLightingRemoteCallObject::USmartWirelessLightingRemoteCallObject() : Super()
 {
@@ -69,28 +69,49 @@ void USmartWirelessLightingRemoteCallObject::UpdateLightControlPanelBuildableLig
 	}
 }
 
-void USmartWirelessLightingRemoteCallObject::AddLightConnection_Implementation(FBuildableLightingConnection BuildableLightingConnection, FSmartLightingBucket SmartLightingBucket)
+void USmartWirelessLightingRemoteCallObject::Server_RefreshLightControlPanelBucket_Implementation(class ASmartLightsControlPanel* mControlPanel, FBuildableLightingConnection LightingConnection)
+{
+	if (mControlPanel && LightingConnection.mBuildableLightSource) {
+		//if (mControlPanel->GetIsDirtyList()) {
+		mControlPanel->UpdateLightingConnection(LightingConnection);
+		/*}
+		else {*/
+			//mControlPanel->SetIsDirtyList();
+		//}
+		//mControlPanel->RefreshControlPanelBucket();
+	}	
+}
+
+void USmartWirelessLightingRemoteCallObject::AddLightConnection_Implementation(FBuildableLightingConnection BuildableLightingConnection, class ASmartLightsControlPanel* mControlPanel)
 {
 	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::AddLightConnection"));
-	SmartLightingBucket.mControlPanel->AddLightingConnectionToControlPanel(BuildableLightingConnection);
+	if (mControlPanel) {
+		mControlPanel->AddLightingConnectionToControlPanel(BuildableLightingConnection);
+	}
 }
 
-void USmartWirelessLightingRemoteCallObject::RemoveLightConnection_Implementation(FBuildableLightingConnection BuildableLightingConnection, FSmartLightingBucket SmartLightingBucket)
+void USmartWirelessLightingRemoteCallObject::RemoveLightConnection_Implementation(FBuildableLightingConnection BuildableLightingConnection, class ASmartLightsControlPanel* mControlPanel)
 {
 	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::RemoveLightConnection"));
-	SmartLightingBucket.mControlPanel->RemoveLightingConnectionToControlPanel(BuildableLightingConnection);
+	if (mControlPanel) {
+		mControlPanel->RemoveLightingConnectionToControlPanel(BuildableLightingConnection);
+	}
 }
 
-void USmartWirelessLightingRemoteCallObject::UpdateLightControlData_Implementation(FSmartLightingBucket SmartLightingBucket, FLightSourceControlData LightControlData)
+void USmartWirelessLightingRemoteCallObject::UpdateLightControlData_Implementation(class ASmartLightsControlPanel* mControlPanel, FLightSourceControlData LightControlData)
 {
 	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::UpdateLightControlData"));
-	SmartLightingBucket.mControlPanel->UpdateLightControlData(LightControlData);
+	if (mControlPanel) {
+		mControlPanel->UpdateLightControlData(LightControlData);
+	}
 }
 
-void USmartWirelessLightingRemoteCallObject::UpdateControlPanelStatus_Implementation(FSmartLightingBucket SmartLightingBucket, bool IsEnabled)
+void USmartWirelessLightingRemoteCallObject::UpdateControlPanelStatus_Implementation(class ASmartLightsControlPanel* mControlPanel, bool IsEnabled)
 {
 	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::UpdateControlPanelStatus"));
-	SmartLightingBucket.mControlPanel->UpdateLightStatus(IsEnabled);
+	if (mControlPanel) {
+		mControlPanel->UpdateLightStatus(IsEnabled);
+	}
 }
 
 void USmartWirelessLightingRemoteCallObject::DebugWirelessLightingRCO(FString Location)
