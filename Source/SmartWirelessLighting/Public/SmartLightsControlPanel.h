@@ -6,6 +6,7 @@
 #include "FGCircuitSubsystem.h"
 #include "FGCircuitConnectionComponent.h"
 #include "FGInventoryComponent.h"
+#include "FGPowerCircuit.h"
 #include "FGPowerConnectionComponent.h"
 #include "FGPowerInfoComponent.h"
 #include "FGUseableInterface.h"
@@ -140,6 +141,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "WirelessLightsControlPanel|LightPanel")
 	void OnLightingConnectionDestoryed(AActor* destoryedActor);
+
+	/*UFUNCTION()
+	void BindTo_OnLightConnectionChanged(class UFGCircuitConnectionComponent* CircuitConnection);*/
 	
 	UFUNCTION(BlueprintCallable, Category = "WirelessLightsControlPanel|LightPanel", meta = (DisplayName = "GetLightingConnections", CompactNodeTitle = "BuildableLightingConnections" ))
 	TArray<FBuildableLightingConnection>& GetBuildableLightingConnections();
@@ -152,7 +156,6 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "WirelessLightsControlPanel|LightPanel", meta = (DisplayName = "IsDirtyList", CompactNodeTitle = "IsDirtyList"))
 	bool GetIsDirtyList();
-
 
 protected:
 
@@ -168,6 +171,9 @@ protected:
 	UFUNCTION()
 	void OnRep_IsDirtyList();
 	
+public:
+	FConnectionChanged OnConnectionChanged;
+
 private:
 
 	UPROPERTY(Replicated)
@@ -201,6 +207,26 @@ private:
 			}
 		}
 		return nullptr;
+	}
+
+	bool IsLightConnectedToLightsControlPanel(class UFGPowerConnectionComponent* PowerConnection) 
+	{
+		bool HasConnectionToControlPanel = false;
+		if (PowerConnection->GetPowerCircuit()) 
+		{
+			TArray< class UFGCircuitConnectionComponent* >& AllCircuitConnections = *(new TArray<class UFGCircuitConnectionComponent*>);
+			AllCircuitConnections = PowerConnection->GetPowerCircuit()->GetComponents();
+			if (AllCircuitConnections.Num())
+			{
+				for (class UFGCircuitConnectionComponent* CircuitConnection : AllCircuitConnections)
+				{
+					HasConnectionToControlPanel = (CircuitConnection && CircuitConnection->GetOwner() && (CircuitConnection->GetOwner()->GetName().Contains("Build_LightsControlPanel")
+						|| CircuitConnection->GetOwner()->GetName().Contains("Build_SmartWirelessLightingControlPanel")));
+					if (HasConnectionToControlPanel) break;
+				}
+			}
+		}
+		return HasConnectionToControlPanel;
 	}
 
 	ELightSourceType GetBuildableLightSourceType(FString LightSourceName)

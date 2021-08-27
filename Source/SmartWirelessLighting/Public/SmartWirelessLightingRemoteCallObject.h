@@ -43,7 +43,10 @@ public:
 	void UpdateLightControlPanelBuildableLightSources(UPARAM(Ref)FSmartLightingBucket& SmartLightingBucket);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO|Lights")
-	void Server_RefreshLightControlPanelBucket(class ASmartLightsControlPanel* mControlPanel, FBuildableLightingConnection BuildableLightingConnection);
+	void Server_UpdateLightControlPanelBucket(class ASmartLightsControlPanel* mControlPanel, FBuildableLightingConnection BuildableLightingConnection);
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO|Lights")
+	void Server_RefreshLightControlPanelBucket(class ASmartLightsControlPanel* mControlPanel);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO|Lights")
 	void AddLightConnection(FBuildableLightingConnection BuildableLightingConnection, class ASmartLightsControlPanel* mControlPanel);

@@ -69,7 +69,7 @@ void USmartWirelessLightingRemoteCallObject::UpdateLightControlPanelBuildableLig
 	}
 }
 
-void USmartWirelessLightingRemoteCallObject::Server_RefreshLightControlPanelBucket_Implementation(class ASmartLightsControlPanel* mControlPanel, FBuildableLightingConnection LightingConnection)
+void USmartWirelessLightingRemoteCallObject::Server_UpdateLightControlPanelBucket_Implementation(class ASmartLightsControlPanel* mControlPanel, FBuildableLightingConnection LightingConnection)
 {
 	if (mControlPanel && LightingConnection.mBuildableLightSource) {
 		//if (mControlPanel->GetIsDirtyList()) {
@@ -80,6 +80,13 @@ void USmartWirelessLightingRemoteCallObject::Server_RefreshLightControlPanelBuck
 		//}
 		//mControlPanel->RefreshControlPanelBucket();
 	}	
+}
+
+void USmartWirelessLightingRemoteCallObject::Server_RefreshLightControlPanelBucket_Implementation(class ASmartLightsControlPanel* mControlPanel)
+{
+	if (mControlPanel) {
+		mControlPanel->RefreshControlPanelBucket();
+	}
 }
 
 void USmartWirelessLightingRemoteCallObject::AddLightConnection_Implementation(FBuildableLightingConnection BuildableLightingConnection, class ASmartLightsControlPanel* mControlPanel)

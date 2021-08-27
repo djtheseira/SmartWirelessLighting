@@ -26,7 +26,6 @@ ASmartLightsControlPanel::ASmartLightsControlPanel() : Super()
 void ASmartLightsControlPanel::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	//DOREPLIFETIME(ASmartLightsControlPanel, mControlPanelSmartLightingBucket);
 	DOREPLIFETIME(ASmartLightsControlPanel, mIsFirstUpdate);
 	DOREPLIFETIME(ASmartLightsControlPanel, mIsDirtyList);
 	DOREPLIFETIME(ASmartLightsControlPanel, mBuildableLightingConnections);
@@ -70,7 +69,6 @@ void ASmartLightsControlPanel::SetupVariables(class UFGCircuitConnectionComponen
 
 void ASmartLightsControlPanel::RefreshControlPanelBucket_Implementation()
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RefreshControlPanelBucket Start ControlPanel: %s %d"), *mControlPanel->GetName(), mBuildableLightingConnections.Num());
 	int32 DownstreamConnectionCircuitId = mDownstreamConnection->GetCircuitID();
 	UFGPowerConnectionComponent* DownstreamPowerConnection = Cast<UFGPowerConnectionComponent>(mDownstreamConnection);
 	TArray<FBuildableLightingConnection> NewBuildableLightingConnections = mBuildableLightingConnections;
@@ -86,13 +84,23 @@ void ASmartLightsControlPanel::RefreshControlPanelBucket_Implementation()
 			LightingConnection.mBuildableLightSource->OnDestroyed.AddDynamic(this, &ASmartLightsControlPanel::OnLightingConnectionDestoryed);
 		}
 
+		/*if (!LightingConnection.mBuildablePowerConnection->OnConnectionChanged.IsBoundToObject(this))
+		{
+			LightingConnection.mBuildablePowerConnection->OnConnectionChanged.AddUFunction(this, FName("BindTo_OnLightConnectionChanged"), LightingConnection.mBuildablePowerConnection);
+		}*/
+
 		TArray< UFGCircuitConnectionComponent* >& LightConnections = *(new TArray< UFGCircuitConnectionComponent*>);
 		LightingConnection.mBuildablePowerConnection->GetConnections(LightConnections);
-
 		int32 ConnectionIndex = NewBuildableLightingConnections.Find(LightingConnection);
-		if (LightingConnection.mBuildablePowerConnection->GetCircuitID() > -1 && !LightConnections.Contains(this->mDownstreamConnection))
+		bool IsConnectedToLightControlPanel = IsLightConnectedToLightsControlPanel(LightingConnection.mBuildablePowerConnection);
+		if (LightingConnection.mBuildablePowerConnection->GetCircuitID() > -1 && !LightConnections.Contains(this->mDownstreamConnection) && IsConnectedToLightControlPanel)
 		{
 			LightingConnection.mShouldShow = false;
+			LightingConnection.isConnected = false;
+		}
+		else if (LightingConnection.mBuildablePowerConnection->GetCircuitID() > -1 && !IsConnectedToLightControlPanel && LightingConnection.mBuildablePowerConnection->GetNumFreeConnections() > 0)
+		{
+			LightingConnection.mShouldShow = true;
 			LightingConnection.isConnected = false;
 		}
 		else
@@ -103,12 +111,9 @@ void ASmartLightsControlPanel::RefreshControlPanelBucket_Implementation()
 			}
 			LightingConnection.mShouldShow = true;
 		}
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RefreshControlPanelBucket %s: %s conn; %s show"), *LightingConnection.mBuildableLightSource->GetName(), LightingConnection.isConnected ? TEXT("is") : TEXT("is not"), LightingConnection.mShouldShow ? TEXT("should") : TEXT("should not"));
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RefreshControlPanelBucket %s: circuitid: %d"), *LightingConnection.mBuildableLightSource->GetName(), LightingConnection.mBuildablePowerConnection->GetCircuitID());
 		LightingConnection.mLightSourceType = this->GetBuildableLightSourceType(LightingConnection.mBuildableLightSource->GetName());
 		LightingConnection.mDistanceToControlPanel = floorf(mControlPanel->GetHorizontalDistanceTo(LightingConnection.mBuildableLightSource)) / 100;
 		NewBuildableLightingConnections[ConnectionIndex] = LightingConnection;
-		//mBuildableLightingConnections.Insert(LightingConnection, ConnectionIndex);
 	}
 
 	if (NewBuildableLightingConnections.Num() > 0)
@@ -264,6 +269,20 @@ void ASmartLightsControlPanel::SetIsDirtyList_Implementation()
 	}
 }
 
+
+/*
+ * Keeping this here for my sake..gonna try to implmement this at some point..at this point, just dont feel like working on this bug.
+ * Refreshing the list isn't that intensive, at least not yet..
+ */
+//void ASmartLightsControlPanel::BindTo_OnLightConnectionChanged(class UFGCircuitConnectionComponent* CircuitConnection)
+//{
+//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::BindTo_OnLightConnectionChanged %s %d"), HasAuthority() ? TEXT("Auth") : TEXT("Remote"), CircuitConnection->GetCircuitID());
+//	if (HasAuthority()) {
+//		CircuitConnection->OnConnectionChanged.RemoveAll(this);
+//		RefreshControlPanelBucket();
+//	}
+//}
+
 //FSmartLightingBucket ASmartLightsControlPanel::GetControlPanelSmartLightingBucket()
 //{
 //	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetControlPanelSmartLightingBucket Num %d"), mControlPanelSmartLightingBucket.mBuildableLightingConnections.Num());
@@ -295,11 +314,6 @@ bool ASmartLightsControlPanel::GetIsDirtyList()
 {
 	return mIsDirtyList;
 }
-
-//void ASmartLightsControlPanel::OnRep_ControlPanelLightingBucketUpdated()
-//{
-//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnRep_ControlPanelLightingBucketUpdated %s"), *mControlPanelSmartLightingBucket.mControlPanel->GetName());
-//}
 
 void ASmartLightsControlPanel::OnRep_DirtyIndex()
 {
