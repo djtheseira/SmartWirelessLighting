@@ -10,21 +10,23 @@
 #include "FGPowerInfoComponent.h"
 #include "Logging.h"
 #include "Buildables/FGBuildable.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 ASmartLightsControlPanel::ASmartLightsControlPanel() : Super() 
 {
-	this->SetReplicates(true);
+	//this->SetReplicates(true);
 	this->bReplicates = true;
-	this->NetDormancy = DORM_Initial;
-	this->NetCullDistanceSquared = 5624999936;
-	this->mHighlightParticleClassName = FSoftClassPath("/Game/FactoryGame/Buildable/-Shared/Particle/NewBuildingPing.NewBuildingPing_C");
-	this->mDismantleEffectClassName = FSoftClassPath("/Game/FactoryGame/Buildable/Factory/-Shared/BP_MaterialEffect_Dismantle.BP_MaterialEffect_Dismantle_C");
-	this->mBuildEffectClassName = FSoftClassPath("/Game/FactoryGame/Buildable/Factory/-Shared/BP_MaterialEffect_Build.BP_MaterialEffect_Build_C");
+	//this->NetDormancy = DORM_Initial;
+	//this->NetCullDistanceSquared = 5624999936;
+	//this->mHighlightParticleClassName = FSoftClassPath("/Game/FactoryGame/Buildable/-Shared/Particle/NewBuildingPing.NewBuildingPing_C");
+	//this->mDismantleEffectClassName = FSoftClassPath("/Game/FactoryGame/Buildable/Factory/-Shared/BP_MaterialEffect_Dismantle.BP_MaterialEffect_Dismantle_C");
+	//this->mBuildEffectClassName = FSoftClassPath("/Game/FactoryGame/Buildable/Factory/-Shared/BP_MaterialEffect_Build.BP_MaterialEffect_Build_C");
 }
 
 void ASmartLightsControlPanel::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
+	
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ASmartLightsControlPanel, mIsFirstUpdate);
 	DOREPLIFETIME(ASmartLightsControlPanel, mIsDirtyList);
@@ -112,7 +114,11 @@ void ASmartLightsControlPanel::RefreshControlPanelBucket_Implementation()
 			LightingConnection.mShouldShow = true;
 		}
 		LightingConnection.mLightSourceType = this->GetBuildableLightSourceType(LightingConnection.mBuildableLightSource->GetName());
+		FVector DirectionUnitVector = UKismetMathLibrary::GetDirectionUnitVector(mControlPanel->GetActorLocation(), LightingConnection.mBuildableLightSource->GetActorLocation());
+		
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RefreshControlPanelBucket DirectionUnit: %s %s"), *mControlPanel->GetName(), *DirectionUnitVector.ToString());
 		LightingConnection.mDistanceToControlPanel = floorf(mControlPanel->GetHorizontalDistanceTo(LightingConnection.mBuildableLightSource)) / 100;
+		
 		NewBuildableLightingConnections[ConnectionIndex] = LightingConnection;
 	}
 
@@ -147,6 +153,8 @@ void ASmartLightsControlPanel::AddBuildableLightSource_Implementation(class AFGB
 		if (LightConnection) {
 			LightingConnection.mBuildablePowerConnection = LightConnection;
 			LightingConnection.mShouldShow = LightConnection->GetNumConnections() == 0;
+			//LightingConnection.mBuildableLightSource->mPowerConsumption = 0;
+			//LightingConnection.mBuildableLightSource->UpdatePowerConsumption();
 		}
 		int32 DirtyIndex = mBuildableLightingConnections.Add(LightingConnection);
 		mDirtyIndex = DirtyIndex;
@@ -162,6 +170,18 @@ void ASmartLightsControlPanel::RemoveBuildableLightSource_Implementation(class A
 		if (KeyIndex > -1) {
 			if (mBuildableLightingConnections[KeyIndex].mBuildableWire)
 			{
+				//float powerConsumption = 0;
+				//if (mBuildableLightingConnections[KeyIndex].mLightSourceType == ELightSourceType::LS_StreetLight) {
+				//	powerConsumption = 1;
+				//} else if (mBuildableLightingConnections[KeyIndex].mLightSourceType == ELightSourceType::LS_CeilingLight) {
+				//	powerConsumption = 2;
+				//} else if (mBuildableLightingConnections[KeyIndex].mLightSourceType == ELightSourceType::LS_PoleFloodLight) {
+				//	powerConsumption = 6;
+				//} else if (mBuildableLightingConnections[KeyIndex].mLightSourceType == ELightSourceType::LS_WallFloodLight) {
+				//	powerConsumption = 6;
+				//}
+				//mBuildableLightingConnections[KeyIndex].mBuildableLightSource->mPowerConsumption = powerConsumption;
+				//mBuildableLightingConnections[KeyIndex].mBuildableLightSource->UpdatePowerConsumption();
 				mBuildableLightingConnections[KeyIndex].mBuildableWire->TurnOffAndDestroy();
 				mBuildableLightingConnections[KeyIndex].mBuildableWire->Destroy(true);
 			}

@@ -42,6 +42,11 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 
 # Changelog
 
+### 1.0.0
+
+   - Updated to support the new Update 5
+   - Resolve issue where list of lights wouldn't load properly when switching between the Light Details & Light Selection window.
+
 ### 0.9.6
 
    - If a Light is not connected to a Light Control Panel or SMART Lights Control Panel, it will be available to be connected to, as long as there are free connections.
