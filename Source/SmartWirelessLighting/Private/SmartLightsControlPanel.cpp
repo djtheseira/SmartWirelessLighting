@@ -15,13 +15,7 @@
 
 ASmartLightsControlPanel::ASmartLightsControlPanel() : Super() 
 {
-	//this->SetReplicates(true);
 	this->bReplicates = true;
-	//this->NetDormancy = DORM_Initial;
-	//this->NetCullDistanceSquared = 5624999936;
-	//this->mHighlightParticleClassName = FSoftClassPath("/Game/FactoryGame/Buildable/-Shared/Particle/NewBuildingPing.NewBuildingPing_C");
-	//this->mDismantleEffectClassName = FSoftClassPath("/Game/FactoryGame/Buildable/Factory/-Shared/BP_MaterialEffect_Dismantle.BP_MaterialEffect_Dismantle_C");
-	//this->mBuildEffectClassName = FSoftClassPath("/Game/FactoryGame/Buildable/Factory/-Shared/BP_MaterialEffect_Build.BP_MaterialEffect_Build_C");
 }
 
 void ASmartLightsControlPanel::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
@@ -170,18 +164,6 @@ void ASmartLightsControlPanel::RemoveBuildableLightSource_Implementation(class A
 		if (KeyIndex > -1) {
 			if (mBuildableLightingConnections[KeyIndex].mBuildableWire)
 			{
-				//float powerConsumption = 0;
-				//if (mBuildableLightingConnections[KeyIndex].mLightSourceType == ELightSourceType::LS_StreetLight) {
-				//	powerConsumption = 1;
-				//} else if (mBuildableLightingConnections[KeyIndex].mLightSourceType == ELightSourceType::LS_CeilingLight) {
-				//	powerConsumption = 2;
-				//} else if (mBuildableLightingConnections[KeyIndex].mLightSourceType == ELightSourceType::LS_PoleFloodLight) {
-				//	powerConsumption = 6;
-				//} else if (mBuildableLightingConnections[KeyIndex].mLightSourceType == ELightSourceType::LS_WallFloodLight) {
-				//	powerConsumption = 6;
-				//}
-				//mBuildableLightingConnections[KeyIndex].mBuildableLightSource->mPowerConsumption = powerConsumption;
-				//mBuildableLightingConnections[KeyIndex].mBuildableLightSource->UpdatePowerConsumption();
 				mBuildableLightingConnections[KeyIndex].mBuildableWire->TurnOffAndDestroy();
 				mBuildableLightingConnections[KeyIndex].mBuildableWire->Destroy(true);
 			}
@@ -284,6 +266,7 @@ void ASmartLightsControlPanel::UpdateLightStatus_Implementation(bool LightStatus
 
 void ASmartLightsControlPanel::SetIsDirtyList_Implementation()
 {
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::SetIsLightListDirty"));
 	if (HasAuthority()) {
 		mIsDirtyList = true;
 	}
@@ -317,11 +300,25 @@ int32 ASmartLightsControlPanel::GetLightingConnectionIndex(FBuildableLightingCon
 
 TArray<FBuildableLightingConnection>& ASmartLightsControlPanel::GetBuildableLightingConnections()
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetBuildableLightingConnections"));
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetBuildableLightingConnections isdirty: %s hasauth: %s"), mIsDirtyList ? TEXT("true") : TEXT("false"), HasAuthority() ? TEXT("true") : TEXT("false"));
 	if (mIsDirtyList && HasAuthority()) {
 		RefreshControlPanelBucket();
 	}
 	return mBuildableLightingConnections;
+}
+
+TArray<FBuildableLightingConnection> ASmartLightsControlPanel::GetBuildableLightingConnectionsByType(int32 FilterTypeIndex)
+{
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetBuildableLightingConnectionsByType filterindex: %d"), FilterTypeIndex);
+	if (mIsDirtyList && HasAuthority()) {
+		RefreshControlPanelBucket();
+	}
+	auto FilteredBuildableLightingConnections = mBuildableLightingConnections.FilterByPredicate([FilterTypeIndex](const FBuildableLightingConnection& LightingConnection) {
+		ELightSourceType LightSourceTypeFilter = FilterTypeIndex == 0 ? ELightSourceType::LS_StreetLight : FilterTypeIndex == 1 ? ELightSourceType::LS_CeilingLight : ELightSourceType::LS_PoleFloodLight;
+		return LightingConnection.mLightSourceType == LightSourceTypeFilter || (FilterTypeIndex == 2 && LightingConnection.mLightSourceType == ELightSourceType::LS_WallFloodLight);
+	});
+	
+	return FilteredBuildableLightingConnections;
 }
 
 FBuildableLightingConnection ASmartLightsControlPanel::GetDirtyLightingConnection()

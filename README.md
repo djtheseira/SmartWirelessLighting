@@ -14,6 +14,19 @@ If you'd like to help this mod grow and develop, feel free to reach out to me!
 
 # Changelog
 
+### 1.0.3
+
+   - Fixed light list screen wasn't refreshing properly.
+   - Small changes to decrease workload on the lists page.
+
+### 1.0.2
+
+   - Fixed loading issue
+
+### 1.0.1
+
+   - Updated to support U5
+
 ### 1.0.0
 
    - Updated to support the new Update 5

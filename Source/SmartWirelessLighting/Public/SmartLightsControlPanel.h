@@ -1,10 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FactoryGame.h"
 #include "FGBuildableSubsystem.h"
 #include "FGCharacterPlayer.h"
 #include "FGCircuitSubsystem.h"
 #include "FGCircuitConnectionComponent.h"
+#include "FGColoredInstanceMeshProxy.h"
 #include "FGInventoryComponent.h"
 #include "FGPowerCircuit.h"
 #include "FGPowerConnectionComponent.h"
@@ -13,8 +15,10 @@
 #include "Logging.h"
 #include "Buildables/FGBuildable.h"
 #include "Buildables/FGBuildableWire.h"
-#include "Buildables/FGBuildableLightSource.h"
+#include "Buildables/FGBuildableCircuitBridge.h"
+#include "Buildables/FGBuildableControlPanelHost.h"
 #include "Buildables/FGBuildableLightsControlPanel.h"
+#include "Buildables/FGBuildableLightSource.h"
 #include "SmartLightsControlPanel.generated.h"
 
 UENUM(BlueprintType)
@@ -147,6 +151,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "WirelessLightsControlPanel|LightPanel", meta = (DisplayName = "GetLightingConnections", CompactNodeTitle = "BuildableLightingConnections" ))
 	TArray<FBuildableLightingConnection>& GetBuildableLightingConnections();
+	
+	UFUNCTION(BlueprintCallable, Category = "WirelessLightsControlPanel|LightPanel")
+	TArray<FBuildableLightingConnection> GetBuildableLightingConnectionsByType(int32 FilterTypeIndex);
+
 
 	UFUNCTION(BlueprintCallable, Category = "WirelessLightsControlPanel|LightPanel", meta = (DisplayName = "GetDirtyLightingConnection"))
 	FBuildableLightingConnection GetDirtyLightingConnection();
