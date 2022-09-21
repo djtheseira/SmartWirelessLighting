@@ -6,7 +6,7 @@
 #include "FGCharacterPlayer.h"
 #include "Buildables/FGBuildable.h"
 #include "Buildables/FGBuildableLightSource.h"
-#include "SmartLightsControlPanel_New.h"
+#include "SmartLightsControlPanel.h"
 #include "SmartLightsControlPanelSubsystem.generated.h"
 
 
@@ -51,7 +51,7 @@ public:
 	void GetAllLightSources();
 
 	UFUNCTION(BlueprintCallable)
-	TArray< FBuildableLightingConnection_New> GetControlPanelLightSources(ASmartLightsControlPanel_New* ControlPanel);
+	TArray< FBuildableLightingConnection> GetControlPanelLightSources(ASmartLightsControlPanel* ControlPanel);
 
 	UPROPERTY(BlueprintReadOnly, Category = "SmartWirelessLighting2", DisplayName = "BuildableSubsystem")
 	class AFGBuildableSubsystem* mBuildableSubsystem;
@@ -60,7 +60,7 @@ public:
 	TArray<AFGBuildableLightSource*> mBuildableLightSources = *(new TArray<AFGBuildableLightSource*>);
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "SmartWirelessLighting2", DisplayName = "Buildable Light Sources")
-	TArray<FBuildableLightingConnection_New> mBuildableLightingConnections = *(new TArray<FBuildableLightingConnection_New>);
+	TArray<FBuildableLightingConnection> mBuildableLightingConnections = *(new TArray<FBuildableLightingConnection>);
 
 	UPROPERTY(BlueprintAssignable, Category = "SmartWirelessLighting2")
 	FBuildableLightSourceListUpdated OnBuildableLightSourceStateChanged;
@@ -92,7 +92,7 @@ public:
 				for (class UFGCircuitConnectionComponent* CircuitConnection : AllCircuitConnections)
 				{
 					HasConnectionToControlPanel = (CircuitConnection && CircuitConnection->GetOwner() && (CircuitConnection->GetOwner()->GetName().Contains("Build_LightsControlPanel")
-						|| CircuitConnection->GetOwner()->GetName().Contains("Build_SmartWirelessLightingControlPanel_New") || CircuitConnection->GetOwner()->GetName().Contains("Build_SmartWirelessLightingControlPanel")));
+						|| CircuitConnection->GetOwner()->GetName().Contains("Build_SmartWirelessLightingControlPanel")));
 					if (HasConnectionToControlPanel) break;
 				}
 			}
@@ -102,23 +102,23 @@ public:
 
 private:
 
-	ELightSourceType_New GetBuildableLightSourceType(FString LightSourceName)
+	ELightSourceType GetBuildableLightSourceType(FString LightSourceName)
 	{
 		if (LightSourceName.Contains("Build_StreetLight"))
 		{
-			return ELightSourceType_New::LS_StreetLight;
+			return ELightSourceType::LS_StreetLight;
 		}
 		else if (LightSourceName.Contains("Build_CeilingLight"))
 		{
-			return ELightSourceType_New::LS_CeilingLight;
+			return ELightSourceType::LS_CeilingLight;
 		}
 		else if (LightSourceName.Contains("Build_FloodlightPole"))
 		{
-			return ELightSourceType_New::LS_PoleFloodLight;
+			return ELightSourceType::LS_PoleFloodLight;
 		}
 		else
 		{
-			return ELightSourceType_New::LS_WallFloodLight;
+			return ELightSourceType::LS_WallFloodLight;
 		}
 	}
 

@@ -1,7 +1,7 @@
 #include "SmartLightsControlPanelSubsystem.h"
 
 #include "Logging.h"
-#include "SmartLightsControlPanel_New.h"
+#include "SmartLightsControlPanel.h"
 
 #include "CoreMinimal.h"
 #include "FactoryGame.h"
@@ -88,8 +88,8 @@ void ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed(AActor* De
 
 void ASmartLightsControlPanelSubsystem::AddNewLightSource(AFGBuildableLightSource* BuildableLightSource) {
 	if (HasAuthority()) {
-		FBuildableLightingConnection_New LightingConnection = FBuildableLightingConnection_New();
-		ELightSourceType_New lightSourceType = GetBuildableLightSourceType(BuildableLightSource->GetName());
+		FBuildableLightingConnection LightingConnection = FBuildableLightingConnection();
+		ELightSourceType lightSourceType = GetBuildableLightSourceType(BuildableLightSource->GetName());
 		UFGPowerConnectionComponent* LightPowerConnection = Cast<UFGPowerConnectionComponent>(BuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
 		
 		LightingConnection.mBuildableLightSource = BuildableLightSource;
@@ -124,11 +124,11 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 	if (HasAuthority()) {
 		mBuildableLightSources = *(new TArray<AFGBuildableLightSource*>);
 		mBuildableSubsystem->GetTypedBuildable(mBuildableLightSources);
-		mBuildableLightingConnections = *(new TArray<FBuildableLightingConnection_New>);
+		mBuildableLightingConnections = *(new TArray<FBuildableLightingConnection>);
 		
 		for (AFGBuildableLightSource* BuildableLightSource : mBuildableLightSources) {
 			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop Start"));
-			FBuildableLightingConnection_New LightingConnection = FBuildableLightingConnection_New();
+			FBuildableLightingConnection LightingConnection = FBuildableLightingConnection();
 			UFGPowerConnectionComponent* LightPowerConnection = Cast<UFGPowerConnectionComponent>(BuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
 
 			if (!BuildableLightSource->OnDestroyed.Contains(this, "RespondToLightSourceDestroyed")) {
@@ -136,7 +136,7 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 				BuildableLightSource->OnDestroyed.AddDynamic(this, &ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed);
 			}
 
-			ELightSourceType_New lightSourceType = GetBuildableLightSourceType(BuildableLightSource->GetName());
+			ELightSourceType lightSourceType = GetBuildableLightSourceType(BuildableLightSource->GetName());
 
 			LightingConnection.mBuildablePowerConnection = LightPowerConnection;
 			LightingConnection.mBuildableLightSource = BuildableLightSource;
@@ -151,7 +151,7 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 
 		if (mBuildableLightingConnections.Num() > 0)
 		{
-			mBuildableLightingConnections.Sort([](const FBuildableLightingConnection_New& A, const FBuildableLightingConnection_New& B)
+			mBuildableLightingConnections.Sort([](const FBuildableLightingConnection& A, const FBuildableLightingConnection& B)
 			{
 				if (A.isConnected) {
 					return true;
@@ -172,11 +172,11 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 
 }
 
-TArray< FBuildableLightingConnection_New> ASmartLightsControlPanelSubsystem::GetControlPanelLightSources(ASmartLightsControlPanel_New* ControlPanel) {
+TArray< FBuildableLightingConnection> ASmartLightsControlPanelSubsystem::GetControlPanelLightSources(ASmartLightsControlPanel* ControlPanel) {
 	// Get All Buildable Light Sources since its not actually set.
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources"));
 	
-	TArray<FBuildableLightingConnection_New> BuildableLightingConnections = *(new TArray<FBuildableLightingConnection_New>);
+	TArray<FBuildableLightingConnection> BuildableLightingConnections = *(new TArray<FBuildableLightingConnection>);
 	//if (mLightListDirty) {
 		//this->GetAllLightSources();
 	//}
@@ -188,7 +188,7 @@ TArray< FBuildableLightingConnection_New> ASmartLightsControlPanelSubsystem::Get
 		ControlPanel->SetBuildableLightConnectionCount(mBuildableLightSources.Num());
 	}
 
-	for (FBuildableLightingConnection_New LightingConnection : mBuildableLightingConnections) {
+	for (FBuildableLightingConnection LightingConnection : mBuildableLightingConnections) {
 		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop Start"));
 		//if (LightingConnection.mLightSourceType != LightSourceFilterType) continue;
 
@@ -233,7 +233,7 @@ TArray< FBuildableLightingConnection_New> ASmartLightsControlPanelSubsystem::Get
 
 	if (BuildableLightingConnections.Num() > 0)
 	{
-		BuildableLightingConnections.Sort([](const FBuildableLightingConnection_New& A, const FBuildableLightingConnection_New& B)
+		BuildableLightingConnections.Sort([](const FBuildableLightingConnection& A, const FBuildableLightingConnection& B)
 		{
 			if (A.isConnected) {
 				return true;
