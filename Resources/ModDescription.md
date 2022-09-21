@@ -42,6 +42,13 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 
 # Changelog
 
+### 1.0.4
+
+   - Updated to support U6
+   - Reworked almost the entire system to (hopefully) make things more efficient.
+   - Removed a ton of bloated code that needed to be deprecated.
+   - Fixed how the list of light is updated so that it actually updates properly.
+
 ### 1.0.3
 
    - Fixed light list screen wasn't refreshing properly.
