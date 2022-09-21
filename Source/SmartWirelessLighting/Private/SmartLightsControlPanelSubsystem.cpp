@@ -31,17 +31,17 @@ void ASmartLightsControlPanelSubsystem::GetLifetimeReplicatedProps(TArray< FLife
 }
 
 void ASmartLightsControlPanelSubsystem::BeginPlay() {
-	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay"));
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay"));
 	Super::BeginPlay();
 	mBuildableSubsystem = AFGBuildableSubsystem::Get(GetWorld());
 	
 	if (mBuildableSubsystem) {
-		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem exists"));
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem exists"));
 		mBuildableSubsystem->BuildableConstructedGlobalDelegate.AddDynamic(this, &ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal);
 		
 	}
 	else {
-		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem doesnt exist"));
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem doesnt exist"));
 	}
 
 }
@@ -51,7 +51,7 @@ void ASmartLightsControlPanelSubsystem::RespondToBuildableDismanted() {
 }
 
 ASmartLightsControlPanelSubsystem* ASmartLightsControlPanelSubsystem::getSubsystem(UWorld* world) {
-	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPane lSubsystem::getSubsystem"));
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPane lSubsystem::getSubsystem"));
 	USubsystemActorManager* SubsystemActorManager = world->GetSubsystem<USubsystemActorManager>();
 	check(SubsystemActorManager);
 
@@ -59,7 +59,7 @@ ASmartLightsControlPanelSubsystem* ASmartLightsControlPanelSubsystem::getSubsyst
 }
 
 void ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal(AFGBuildable* buildable) {
-	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal RespondToBuildableConstructedGlobal"));
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal RespondToBuildableConstructedGlobal"));
 
 	AFGBuildableLightSource* lightSource = Cast<AFGBuildableLightSource>(buildable);
 
@@ -73,12 +73,12 @@ void ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal(AFGB
 }
 
 void ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed(AActor* DestroyedActor) {
-	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed RespondToLightSourceDestroyed"));
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed RespondToLightSourceDestroyed"));
 
 	AFGBuildableLightSource* lightSource = Cast<AFGBuildableLightSource>(DestroyedActor);
 
 	if (lightSource != nullptr) {
-		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed actor is light source"));
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed actor is light source"));
 		mBuildableLightSources.Remove(lightSource);
 		RemoveDestroyedLightSource(lightSource);
 		mLightListDirty = true;
@@ -119,7 +119,7 @@ void ASmartLightsControlPanelSubsystem::UpdateLightColorSlot(uint8 slotIdx, FLin
 }
 
 void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
-	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetAllLightSources"));
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetAllLightSources"));
 	// Get All Buildable Light Sources here on init
 	if (HasAuthority()) {
 		mBuildableLightSources = *(new TArray<AFGBuildableLightSource*>);
@@ -127,12 +127,12 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 		mBuildableLightingConnections = *(new TArray<FBuildableLightingConnection_New>);
 		
 		for (AFGBuildableLightSource* BuildableLightSource : mBuildableLightSources) {
-			UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop Start"));
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop Start"));
 			FBuildableLightingConnection_New LightingConnection = FBuildableLightingConnection_New();
 			UFGPowerConnectionComponent* LightPowerConnection = Cast<UFGPowerConnectionComponent>(BuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
 
 			if (!BuildableLightSource->OnDestroyed.Contains(this, "RespondToLightSourceDestroyed")) {
-				UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Doesnt Contain Event"));
+				//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Doesnt Contain Event"));
 				BuildableLightSource->OnDestroyed.AddDynamic(this, &ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed);
 			}
 
@@ -146,7 +146,7 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 			LightingConnection.mDistanceToControlPanel = 0;
 			mBuildableLightingConnections.Add(LightingConnection);
 
-			UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop End"));
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop End"));
 		}
 
 		if (mBuildableLightingConnections.Num() > 0)
@@ -163,7 +163,7 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 			});
 		}
 
-		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetAllLightSources Size: %d"), mBuildableLightSources.Num());
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetAllLightSources Size: %d"), mBuildableLightSources.Num());
 		OnBuildableLightSourceStateChanged.Broadcast();
 		mLightListDirty = false;
 	}
@@ -174,29 +174,29 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 
 TArray< FBuildableLightingConnection_New> ASmartLightsControlPanelSubsystem::GetControlPanelLightSources(ASmartLightsControlPanel_New* ControlPanel) {
 	// Get All Buildable Light Sources since its not actually set.
-	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources"));
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources"));
 	
 	TArray<FBuildableLightingConnection_New> BuildableLightingConnections = *(new TArray<FBuildableLightingConnection_New>);
 	//if (mLightListDirty) {
 		//this->GetAllLightSources();
 	//}
 
-	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources: %d"), mBuildableLightSources.Num());
-	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Panel GetCircuitID: %d"), ControlPanel->mSmartPanelDownstreamConnection->GetCircuitID());
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources: %d"), mBuildableLightSources.Num());
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Panel GetCircuitID: %d"), ControlPanel->mSmartPanelDownstreamConnection->GetCircuitID());
 
 	if (mBuildableLightSources.Num() != ControlPanel->mBuildableLightConnectionCount) {
 		ControlPanel->SetBuildableLightConnectionCount(mBuildableLightSources.Num());
 	}
 
 	for (FBuildableLightingConnection_New LightingConnection : mBuildableLightingConnections) {
-		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop Start"));
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop Start"));
 		//if (LightingConnection.mLightSourceType != LightSourceFilterType) continue;
 
 		AFGBuildableLightSource* BuildableLightSource = LightingConnection.mBuildableLightSource;
 		UFGPowerConnectionComponent* LightPowerConnection = LightingConnection.mBuildablePowerConnection ? LightingConnection.mBuildablePowerConnection : Cast<UFGPowerConnectionComponent>(BuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
 		
 		if (!BuildableLightSource->OnDestroyed.Contains(this, "RespondToLightSourceDestroyed")) {
-			UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Doesnt Contain Event"));
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Doesnt Contain Event"));
 			BuildableLightSource->OnDestroyed.AddDynamic(this, &ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed);
 		}
 
@@ -215,79 +215,21 @@ TArray< FBuildableLightingConnection_New> ASmartLightsControlPanelSubsystem::Get
 		if ((IsConnectedToALightControlPanel && !DoLightConnectionsContainControlPanelConnection)) continue;
 		
 		if (DoLightConnectionsContainControlPanelConnection) {
-			UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Connected to Control Panel"));
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Connected to Control Panel"));
 			LightingConnection.isConnected = true;
 			LightingConnection.mBuildableWire = GetControlPanelToLightWire(LightPowerConnection, ControlPanel->mSmartPanelDownstreamConnection);
 			BuildableLightSource->SetLightControlData(ControlPanel->GetLightControlData());
 		}
 		else {
-			UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Not Connected to Control Panel"));
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Not Connected to Control Panel"));
 			LightingConnection.isConnected = false;
 		}
 
 		LightingConnection.mDistanceToControlPanel = floorf(ControlPanel->GetHorizontalDistanceTo(LightingConnection.mBuildableLightSource)) / 100;
 		BuildableLightingConnections.Add(LightingConnection);
-		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop End"));
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop End"));
 
 	}
-
-	//for (AFGBuildableLightSource* BuildableLightSource : mBuildableLightSources) {
-	//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop Start"));
-	//	auto powerConnections = BuildableLightSource->GetNumPowerConnections();
-	//	FBuildableLightingConnection_New LightingConnection = FBuildableLightingConnection_New();
-	//	UFGPowerConnectionComponent* LightPowerConnection = LightingConnection.mBuildablePowerConnection ? LightingConnection.mBuildablePowerConnection : Cast<UFGPowerConnectionComponent>(BuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
-	//	TArray< UFGCircuitConnectionComponent* >& LightConnections = *(new TArray< UFGCircuitConnectionComponent*>);
-	//	LightPowerConnection->GetConnections(LightConnections);
-	//	LightPowerConnection->GetHiddenConnections(LightConnections);
-
-	//	bool IsConnectedToALightControlPanel = IsLightConnectedToLightsControlPanel(LightPowerConnection);
-	//	bool lightConnectionsContainControlPanelConnection = LightConnections.Contains(ControlPanel->mSmartPanelDownstreamConnection);
-	//	bool shouldShow = false;
-	//	bool isConnected = false;
-
-	//	if (!BuildableLightSource->OnDestroyed.Contains(this, "RespondToLightSourceDestroyed")) {
-	//		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Doesnt Contain Event"));
-	//		BuildableLightSource->OnDestroyed.AddDynamic(this, &ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed);
-	//	}
-	//	
-	//	if (IsConnectedToALightControlPanel && !lightConnectionsContainControlPanelConnection) continue;
-
-	//	if (LightPowerConnection->GetCircuitID() > INDEX_NONE && IsConnectedToALightControlPanel && !lightConnectionsContainControlPanelConnection) {
-	//		shouldShow = false;
-	//		isConnected = false;
-	//	}
-	//	else if (LightPowerConnection->GetCircuitID() > INDEX_NONE && !IsConnectedToALightControlPanel && LightPowerConnection->GetNumFreeConnections() > 0) {
-	//		shouldShow = true;
-	//		isConnected = false;
-	//	}
-	//	else {
-	//		shouldShow = true;
-	//		isConnected = lightConnectionsContainControlPanelConnection;
-	//		if (isConnected) {
-	//			LightingConnection.mBuildableWire = GetControlPanelToLightWire(LightPowerConnection, ControlPanel->mSmartPanelDownstreamConnection);
-	//		}
-	//	}
-	//	
-	//	if (!shouldShow) continue;
-	//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light shouldShow valid"));
-
-	//	ELightSourceType_New lightSourceType = GetBuildableLightSourceType(BuildableLightSource->GetName());
-	//	if (lightSourceType != LightSourceFilterType) continue;
-	//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light lightsourcetype: %s"), *UEnum::GetValueAsString(lightSourceType));
-
-	//	if (isConnected) {
-	//		BuildableLightSource->SetLightControlData(ControlPanel->GetLightControlData());
-	//	}
-	//
-	//	LightingConnection.mBuildablePowerConnection = LightPowerConnection;
-	//	LightingConnection.mBuildableLightSource = BuildableLightSource;
-	//	LightingConnection.mShouldShow = shouldShow;
-	//	LightingConnection.mLightSourceType = lightSourceType;
-	//	LightingConnection.isConnected = isConnected;
-	//	LightingConnection.mDistanceToControlPanel = floorf(ControlPanel->GetHorizontalDistanceTo(LightingConnection.mBuildableLightSource)) / 100;
-	//	BuildableLightingConnections.Add(LightingConnection);
-	//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop End"));
-	//}
 
 	if (BuildableLightingConnections.Num() > 0)
 	{
@@ -303,7 +245,7 @@ TArray< FBuildableLightingConnection_New> ASmartLightsControlPanelSubsystem::Get
 		});
 	}
 
-	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources: Filtered Connections: %d"), BuildableLightingConnections.Num());
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources: Filtered Connections: %d"), BuildableLightingConnections.Num());
 
 	return BuildableLightingConnections;
 }
