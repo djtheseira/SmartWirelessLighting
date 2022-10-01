@@ -38,7 +38,7 @@ void ASmartLightsControlPanelSubsystem::BeginPlay() {
 	if (mBuildableSubsystem) {
 		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem exists"));
 		mBuildableSubsystem->BuildableConstructedGlobalDelegate.AddDynamic(this, &ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal);
-		
+
 	}
 	else {
 		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem doesnt exist"));
@@ -86,11 +86,21 @@ void ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed(AActor* De
 	}
 }
 
+void ASmartLightsControlPanelSubsystem::OnControlPanelToLightConnectionUpdate(class ASmartLightsControlPanel* controlPanel) {
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::OnControlPanelToLightConnectionUpdate"));
+	//if (mLightListDirty) return;
+	//mLightListDirty = true;
+	OnLightSourceStateChanged.Broadcast(controlPanel);
+}
+
 void ASmartLightsControlPanelSubsystem::AddNewLightSource(AFGBuildableLightSource* BuildableLightSource) {
 	if (HasAuthority()) {
 		FBuildableLightingConnection LightingConnection = FBuildableLightingConnection();
 		ELightSourceType lightSourceType = GetBuildableLightSourceType(BuildableLightSource->GetName());
 		UFGPowerConnectionComponent* LightPowerConnection = Cast<UFGPowerConnectionComponent>(BuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
+		
+		// Would be nice to figure out how to tap into the buildeffectfinished stuff..
+		//BuildableLightSource->OnBuildEffectFinished()
 		
 		LightingConnection.mBuildableLightSource = BuildableLightSource;
 		LightingConnection.isConnected = false;
@@ -174,7 +184,7 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 
 TArray< FBuildableLightingConnection> ASmartLightsControlPanelSubsystem::GetControlPanelLightSources(ASmartLightsControlPanel* ControlPanel) {
 	// Get All Buildable Light Sources since its not actually set.
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources"));
+	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources"));
 	
 	TArray<FBuildableLightingConnection> BuildableLightingConnections = *(new TArray<FBuildableLightingConnection>);
 	//if (mLightListDirty) {
@@ -246,6 +256,6 @@ TArray< FBuildableLightingConnection> ASmartLightsControlPanelSubsystem::GetCont
 	}
 
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources: Filtered Connections: %d"), BuildableLightingConnections.Num());
-
+	mLightListDirty = false;
 	return BuildableLightingConnections;
 }

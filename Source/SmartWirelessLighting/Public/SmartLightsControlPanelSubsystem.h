@@ -12,6 +12,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBuildableLightSourceListUpdated);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBuildableLightSourceChanged, class ASmartLightsControlPanel*, controlPanel);
+
 /**
  * 
  */
@@ -47,6 +49,7 @@ public:
 	void AddNewLightSource(AFGBuildableLightSource* LightSource);
 	void RemoveDestroyedLightSource(const AFGBuildableLightSource* LightSource);
 	void UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
+	void OnControlPanelToLightConnectionUpdate(class ASmartLightsControlPanel* controlPanel);
 
 	void GetAllLightSources();
 
@@ -64,6 +67,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "SmartWirelessLighting2")
 	FBuildableLightSourceListUpdated OnBuildableLightSourceStateChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "SmartWirelessLighting2")
+	FBuildableLightSourceChanged OnLightSourceStateChanged;
 
 	bool mLightListDirty = false;
 

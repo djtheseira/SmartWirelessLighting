@@ -115,8 +115,14 @@ public:
 	void UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
 	void Server_UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
 
+	UFUNCTION()
 	void RespondToBuildableLightSourceListUpdated();
-	void RespondToLightColorSlotUpdats();
+
+	UFUNCTION()
+	void RespondToLightSourceStateChange(class ASmartLightsControlPanel* controlPanel);
+	
+	UFUNCTION()
+	void RespondToLightColorSlotUpdate();
 
 	void SetBuildableLightConnectionCount(uint8 BuildableLightConnectionCount);
 
