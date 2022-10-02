@@ -7,10 +7,10 @@
 #include "FGGameInstance.h"
 
 UInitGameWorld::UInitGameWorld() {
-	UE_LOG(LogSWL, Warning, TEXT(".SmartWirelessLightingUInitGameWorld::UInitGameWorld"));
+	//UE_LOG(LogSWL, Warning, TEXT(".SmartWirelessLightingUInitGameWorld::UInitGameWorld"));
 }
 
 void UInitGameWorld::DispatchLifecycleEvent(ELifecyclePhase Phase) {
-	UE_LOG(LogSWL, Warning, TEXT(".SmartWirelessLightingUInitGameWorld::DispatchLifecycleEvent Phase %s"), *LifecyclePhaseToString(Phase));
+	//UE_LOG(LogSWL, Warning, TEXT(".SmartWirelessLightingUInitGameWorld::DispatchLifecycleEvent Phase %s"), *LifecyclePhaseToString(Phase));
 	Super::DispatchLifecycleEvent(Phase);
 }

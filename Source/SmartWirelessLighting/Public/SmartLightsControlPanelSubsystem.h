@@ -98,12 +98,26 @@ public:
 				for (class UFGCircuitConnectionComponent* CircuitConnection : AllCircuitConnections)
 				{
 					HasConnectionToControlPanel = (CircuitConnection && CircuitConnection->GetOwner() && (CircuitConnection->GetOwner()->GetName().Contains("Build_LightsControlPanel")
-						|| CircuitConnection->GetOwner()->GetName().Contains("Build_SmartWirelessLightingControlPanel")));
+						|| CircuitConnection->GetOwner()->GetName().Contains("Build_SmartWirelessLightingControlPanel")
+						|| CircuitConnection->GetOwner()->GetName().Contains("Build_SmartWirelessLightingControlPanel_New")));
 					if (HasConnectionToControlPanel) break;
 				}
 			}
 		}
 		return HasConnectionToControlPanel;
+	}
+
+	UFGPowerConnectionComponent* GetLightSourcePowerConnectionComponent(AFGBuildableLightSource* BuildableLightSource) {
+
+		if (!BuildableLightSource) return nullptr;
+		UFGPowerConnectionComponent* PowerConnection = Cast<UFGPowerConnectionComponent>(BuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
+
+		if (!PowerConnection) return nullptr;
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetLightSourcePowerConnectionComponent %s LightPowerConnection %s"), *(BuildableLightSource->GetName()), (PowerConnection ? TEXT("Has PowerConnection") : TEXT("No PowerConnection")));
+		return PowerConnection;
+
+
+		return nullptr;
 	}
 
 private:
@@ -127,6 +141,4 @@ private:
 			return ELightSourceType::LS_WallFloodLight;
 		}
 	}
-
-
 };

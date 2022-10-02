@@ -62,6 +62,8 @@ void USmartWirelessLightingRemoteCallObject::FindAllBuildableLightSources_Implem
 }
 
 void USmartWirelessLightingRemoteCallObject::SetAvailableLightsForControlPanel_Implementation(class ASmartLightsControlPanel* mControlPanel) {
+	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::SetAvailableLightsForControlPanel_Implementation mControlPanel exists: %s"), (mControlPanel ? TEXT("YES") : TEXT("NO")));
+	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::SetAvailableLightsForControlPanel_Implementation mControlPanel hasAuth: %s"), (mControlPanel->HasAuthority() ? TEXT("YES") : TEXT("NO")));
 	if (mControlPanel->HasAuthority()) {
 		mControlPanel->Server_SetAvailableLightsForControlPanel();
 	}

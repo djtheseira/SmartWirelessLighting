@@ -4,6 +4,7 @@
 #include "SmartLightsControlPanelSubsystem.h"
 #include "SmartWirelessLightingRemoteCallObject.h"
 
+#include "FGPlayerController.h"
 #include "FGCircuitConnectionComponent.h"
 #include "FGCircuitSubsystem.h"
 #include "FGCharacterPlayer.h"
@@ -28,6 +29,8 @@ void ASmartLightsControlPanel::GetLifetimeReplicatedProps(TArray< FLifetimePrope
 	
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ASmartLightsControlPanel, mBuildableLightingConnections);
+	DOREPLIFETIME(ASmartLightsControlPanel, mAvailableLightSources);
+	DOREPLIFETIME(ASmartLightsControlPanel, mSmartPanelDownstreamConnection);
 }
 
 void ASmartLightsControlPanel::OnDismantleEffectFinished()
@@ -115,7 +118,7 @@ void ASmartLightsControlPanel::AddLightConnectionToControlPanel(FBuildableLighti
 		this->Server_AddLightConnectionToControlPanel(BuildableLightingConnection);
 	}
 	else {
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::SetAvailableLightsForControlPanel No Auth"));
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel No Auth"));
 		auto rco = USmartWirelessLightingRemoteCallObject::getRCO(GetWorld());
 		rco->AddLightConnectionToControlPanel(this, BuildableLightingConnection);
 	}
@@ -126,16 +129,20 @@ void ASmartLightsControlPanel::Server_AddLightConnectionToControlPanel(FBuildabl
 	/*
 	* Fix the ceiling light connection issue, im assuming this is also an issue with floodlight stuff 
 	*/
-	if (!BuildableLightingConnection.mBuildablePowerConnection) {
-		BuildableLightingConnection.mBuildablePowerConnection = Cast<UFGPowerConnectionComponent>(BuildableLightingConnection.mBuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
+
+	//if (!BuildableLightingConnection.mBuildablePowerConnection) {
+	BuildableLightingConnection.mBuildablePowerConnection = Cast<UFGPowerConnectionComponent>(BuildableLightingConnection.mBuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
 		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::Server_AddLightConnectionToControlPanel %s LightPowerConnection %s"), *(BuildableLightingConnection.mBuildableLightSource->GetName()), (BuildableLightingConnection.mBuildablePowerConnection ? TEXT("Has PowerConnection") : TEXT("No PowerConnection")));
-	}
+	//}
+
 	ABuild_SmartWirelessWireBase* NewBuildableWire = GetWorld()->SpawnActor<ABuild_SmartWirelessWireBase>(ABuild_SmartWirelessWireBase::StaticClass(), FTransform(BuildableLightingConnection.mBuildablePowerConnection->GetRelativeLocation()));
 	int32 BuildableConnectionIndex = mBuildableLightingConnections.Find(BuildableLightingConnection);
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::Server_AddLightConnectionToControlPanel Index: %d"), BuildableConnectionIndex);
 	//mCircuitSubsystem->ConnectComponents(BuildableLightingConnection.mBuildablePowerConnection, Super::mDownstreamConnection);
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightingConnectionToControlPanel power conn CircuitGroupId: %d"), BuildableLightingConnection.mBuildablePowerConnection->GetPowerCircuit()->GetCircuitGroupID());
 	NewBuildableWire->Connect(BuildableLightingConnection.mBuildablePowerConnection, mSmartPanelDownstreamConnection);
-
+	mSmartPanelDownstreamConnection->AddHiddenConnection(BuildableLightingConnection.mBuildablePowerConnection);
+	
 	BuildableLightingConnection.mBuildableWire = NewBuildableWire;
 	BuildableLightingConnection.mBuildableLightSource->SetLightEnabled(this->IsLightEnabled());
 	BuildableLightingConnection.mBuildableLightSource->SetLightControlData(this->GetLightControlData());
@@ -159,7 +166,10 @@ void ASmartLightsControlPanel::RemoveLightConnectionFromControlPanel(FBuildableL
 
 void ASmartLightsControlPanel::Server_RemoveLightConnectionFromControlPanel(FBuildableLightingConnection BuildableLightingConnection) {
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::Server_RemoveLightConnectionFromControlPanel"));
-	mCircuitSubsystem->DisconnectComponents(mDownstreamConnection, BuildableLightingConnection.mBuildablePowerConnection);
+
+	//mCircuitSubsystem->DisconnectComponents(mDownstreamConnection, (BuildableLightingConnection.mBuildablePowerConnection 
+	//		? BuildableLightingConnection.mBuildablePowerConnection : mSmartLightsControlPanelSubsystem->GetLightSourcePowerConnectionComponent(BuildableLightingConnection.mBuildableLightSource)));
+	BuildableLightingConnection.mBuildablePowerConnection = mSmartLightsControlPanelSubsystem->GetLightSourcePowerConnectionComponent(BuildableLightingConnection.mBuildableLightSource);
 	if (!BuildableLightingConnection.mBuildableWire)
 	{
 		AFGBuildableWire* BuildableWire = mSmartLightsControlPanelSubsystem->GetControlPanelToLightWire(BuildableLightingConnection.mBuildablePowerConnection, mSmartPanelDownstreamConnection);
@@ -170,10 +180,19 @@ void ASmartLightsControlPanel::Server_RemoveLightConnectionFromControlPanel(FBui
 	}
 	
 	if (BuildableLightingConnection.mBuildableWire) {
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::Server_RemoveLightConnectionFromControlPanel Connection hasBuildableWire"));
 		BuildableLightingConnection.mBuildableWire->Disconnect();
 		BuildableLightingConnection.mBuildableWire->TurnOffAndDestroy();
 		BuildableLightingConnection.mBuildableWire->Destroy(true);
+	//}
+	//else {
+	//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::Server_RemoveLightConnectionFromControlPanel Connection hasNoBuildableWire"));
 	}
+
+	mCircuitSubsystem->DisconnectComponents(mDownstreamConnection, (mSmartLightsControlPanelSubsystem->GetLightSourcePowerConnectionComponent(BuildableLightingConnection.mBuildableLightSource)));
+	mSmartPanelDownstreamConnection->RemoveHiddenConnection(BuildableLightingConnection.mBuildablePowerConnection);
+
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::Server_RemoveLightConnectionFromControlPanel buildableLightSource circuitId: %d"), (mSmartLightsControlPanelSubsystem->GetLightSourcePowerConnectionComponent(BuildableLightingConnection.mBuildableLightSource)->GetCircuitID()));
 
 	int32 BuildableConnectionIndex = mBuildableLightingConnections.Find(BuildableLightingConnection);
 	BuildableLightingConnection.mBuildableLightSource->SetLightEnabled(false);
@@ -181,6 +200,7 @@ void ASmartLightsControlPanel::Server_RemoveLightConnectionFromControlPanel(FBui
 	BuildableLightingConnection.mShouldShow = true;
 	BuildableLightingConnection.mBuildableWire = nullptr;
 	mBuildableLightingConnections[BuildableConnectionIndex] = BuildableLightingConnection;
+
 	mSmartLightsControlPanelSubsystem->OnControlPanelToLightConnectionUpdate(this);
 
 	//mDirtyIndex = BuildableConnectionIndex;
@@ -190,16 +210,37 @@ void ASmartLightsControlPanel::Server_RemoveLightConnectionFromControlPanel(FBui
 }
 
 TArray< FBuildableLightingConnection> ASmartLightsControlPanel::GetBuildableLightingConnections(ELightSourceType LightSourceType) {
-
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetBuildableLightingConnections %s"), (HasAuthority() ? TEXT("HAS AUTH") : TEXT("NO AUTH")));
 	if (HasAuthority()) {
 		if (mSmartLightsControlPanelSubsystem->mBuildableLightSources.Num() != mBuildableLightConnectionCount) {
 			this->SetAvailableLightsForControlPanel();
 		}
 	}
 	else {
-		auto rco = USmartWirelessLightingRemoteCallObject::getRCO(GetWorld());
-		rco->SetAvailableLightsForControlPanel(this);
+		USmartWirelessLightingRemoteCallObject* rco = USmartWirelessLightingRemoteCallObject::getRCO(GetWorld());
+		//UE_LOG(LogSWL, Warning, TEXT("ASmartLightsControlPanel::GetBuildableLightingConnections nonAuthority RCO: %s"), (rco ? TEXT("YES") : TEXT("NO")));
+		 rco->SetAvailableLightsForControlPanel(this);
+		//if (GetWorld()) {
+		//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel Yes GetWorld"));
+		//	AFGPlayerController* playerController = Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController());
+		//	if (playerController) {
+		//		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel Yes playerController"));
+		//		auto testRco = playerController->GetRemoteCallObjectOfClass(USmartWirelessLightingRemoteCallObject::StaticClass());
+		//		if (testRco) {
+		//			UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel Yes testRco"));
+		//		}
+		//		else {
+		//			UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel No testRco"));
+		//		}
+		//	}
+		//	else {
+		//		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel No playerController"));
+		//	}
 
+		//}
+		//else {
+		//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel No GetWorld"));
+		//}
 	}
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetBuildableLightingConnections mBuildableLightingConnections %d"), mBuildableLightingConnections.Num());
 	return mBuildableLightingConnections.FilterByPredicate([&LightSourceType](FBuildableLightingConnection BuildableLightingConnection) {
@@ -286,7 +327,9 @@ void ASmartLightsControlPanel::Server_UpdateLightColorSlot(uint8 slotIdx, FLinea
 void ASmartLightsControlPanel::RespondToBuildableLightSourceListUpdated() {
 	if (HasAuthority()) {
 		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RespondToBuildableLightSourceListUpdated"));
-		SetBuildableLightConnectionCount(mSmartLightsControlPanelSubsystem->mBuildableLightSources.Num());
+		SetBuildableLightConnectionCount(-1);
+		this->SetAvailableLightsForControlPanel();
+		//SetBuildableLightConnectionCount(mSmartLightsControlPanelSubsystem->mBuildableLightSources.Num());
 	}
 }
 
@@ -294,10 +337,10 @@ void ASmartLightsControlPanel::RespondToLightSourceStateChange(class ASmartLight
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RespondToLightSourceStateChange this name %s"), *(this->GetName()));
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RespondToLightSourceStateChange controlPanel name %s"), *(controlPanel->GetName()));
 	
-	//if (this != controlPanel) {
+	if (!this->GetName().Equals(controlPanel->GetName())) {
 		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RespondToLightSourceStateChange this != controlPanel"));
-		SetAvailableLightsForControlPanel();
-	//}
+		this->SetAvailableLightsForControlPanel();
+	}
 }
 
 void ASmartLightsControlPanel::RespondToLightColorSlotUpdate() {

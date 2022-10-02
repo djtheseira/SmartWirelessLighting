@@ -28,6 +28,7 @@ ASmartLightsControlPanelSubsystem::ASmartLightsControlPanelSubsystem() {
 void ASmartLightsControlPanelSubsystem::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ASmartLightsControlPanelSubsystem, mBuildableLightSources);
+	DOREPLIFETIME(ASmartLightsControlPanelSubsystem, mBuildableLightingConnections);
 }
 
 void ASmartLightsControlPanelSubsystem::BeginPlay() {
@@ -174,7 +175,7 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 		}
 
 		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetAllLightSources Size: %d"), mBuildableLightSources.Num());
-		OnBuildableLightSourceStateChanged.Broadcast();
+		//OnBuildableLightSourceStateChanged.Broadcast();
 		mLightListDirty = false;
 	}
 
@@ -184,7 +185,7 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 
 TArray< FBuildableLightingConnection> ASmartLightsControlPanelSubsystem::GetControlPanelLightSources(ASmartLightsControlPanel* ControlPanel) {
 	// Get All Buildable Light Sources since its not actually set.
-	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources"));
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources"));
 	
 	TArray<FBuildableLightingConnection> BuildableLightingConnections = *(new TArray<FBuildableLightingConnection>);
 	//if (mLightListDirty) {
@@ -195,6 +196,7 @@ TArray< FBuildableLightingConnection> ASmartLightsControlPanelSubsystem::GetCont
 	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Panel GetCircuitID: %d"), ControlPanel->mSmartPanelDownstreamConnection->GetCircuitID());
 
 	if (mBuildableLightSources.Num() != ControlPanel->mBuildableLightConnectionCount) {
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources mLightSources != CP->mLightSourceCount: %d -> %d"), mBuildableLightSources.Num(), ControlPanel->mBuildableLightConnectionCount);
 		ControlPanel->SetBuildableLightConnectionCount(mBuildableLightSources.Num());
 	}
 
@@ -203,11 +205,18 @@ TArray< FBuildableLightingConnection> ASmartLightsControlPanelSubsystem::GetCont
 		//if (LightingConnection.mLightSourceType != LightSourceFilterType) continue;
 
 		AFGBuildableLightSource* BuildableLightSource = LightingConnection.mBuildableLightSource;
-		UFGPowerConnectionComponent* LightPowerConnection = LightingConnection.mBuildablePowerConnection ? LightingConnection.mBuildablePowerConnection : Cast<UFGPowerConnectionComponent>(BuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
+		UFGPowerConnectionComponent* LightPowerConnection = GetLightSourcePowerConnectionComponent(BuildableLightSource);
+		LightingConnection.mBuildablePowerConnection = LightPowerConnection;
+		
 		
 		if (!BuildableLightSource->OnDestroyed.Contains(this, "RespondToLightSourceDestroyed")) {
 			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Doesnt Contain Event"));
 			BuildableLightSource->OnDestroyed.AddDynamic(this, &ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed);
+		}
+
+		if (!LightPowerConnection) {
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources !LightPowerConnection"));
+			continue;
 		}
 
 		TArray< UFGCircuitConnectionComponent* >& LightConnections = *(new TArray< UFGCircuitConnectionComponent*>);
@@ -216,13 +225,16 @@ TArray< FBuildableLightingConnection> ASmartLightsControlPanelSubsystem::GetCont
 		bool IsConnectedToALightControlPanel = IsLightConnectedToLightsControlPanel(LightPowerConnection);
 		bool DoLightConnectionsContainControlPanelConnection = LightConnections.Contains(ControlPanel->mSmartPanelDownstreamConnection);
 
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light MaxConnections: %d"), LightPowerConnection->GetMaxNumConnections());
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light FreeConnections: %d"), LightPowerConnection->GetNumFreeConnections());
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light GetCircuitID: %d"), LightPowerConnection->GetCircuitID());
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light IsConnectedToALightControlPanel: %s"), (IsConnectedToALightControlPanel ? TEXT("true") : TEXT("false")));
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light DoLightConnectionsContainControlPanelConnection: %s"), (DoLightConnectionsContainControlPanelConnection ? TEXT("true") : TEXT("false")));
+		
 
-		if ((IsConnectedToALightControlPanel && !DoLightConnectionsContainControlPanelConnection)) continue;
+		if ((IsConnectedToALightControlPanel && !DoLightConnectionsContainControlPanelConnection)) {
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light MaxConnections: %d"), LightPowerConnection->GetMaxNumConnections());
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light FreeConnections: %d"), LightPowerConnection->GetNumFreeConnections());
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light GetCircuitID: %d"), LightPowerConnection->GetCircuitID());
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light IsConnectedToALightControlPanel: %s"), (IsConnectedToALightControlPanel ? TEXT("true") : TEXT("false")));
+			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light DoLightConnectionsContainControlPanelConnection: %s"), (DoLightConnectionsContainControlPanelConnection ? TEXT("true") : TEXT("false")));
+			continue;
+		}
 		
 		if (DoLightConnectionsContainControlPanelConnection) {
 			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Light Connected to Control Panel"));
