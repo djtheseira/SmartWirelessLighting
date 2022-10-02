@@ -50,6 +50,7 @@ public:
 	void RemoveDestroyedLightSource(const AFGBuildableLightSource* LightSource);
 	void UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
 	void OnControlPanelToLightConnectionUpdate(class ASmartLightsControlPanel* controlPanel);
+	void OnSmartWirelessLightControlPanelDestroyed();
 
 	void GetAllLightSources();
 

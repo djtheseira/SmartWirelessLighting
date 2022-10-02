@@ -115,6 +115,12 @@ public:
 	void UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
 	void Server_UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_RespondToBuildableLightSourceListUpdated();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_RespondToLightSourceStateChange();
+
 	UFUNCTION()
 	void RespondToBuildableLightSourceListUpdated();
 
@@ -129,16 +135,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel", DisplayName = "GetBuildableLightingConnections")
 	TArray< FBuildableLightingConnection> GetBuildableLightingConnections(ELightSourceType LightSourceType);
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "SmartWirelessLighting2", DisplayName = "Buildable Light Sources")
+	UPROPERTY(BlueprintReadOnly, Replicated, BlueprintReadOnly, Category = "SmartWirelessLighting2", DisplayName = "Buildable Light Sources")
 	TArray<AFGBuildableLightSource*> mAvailableLightSources = *(new TArray<AFGBuildableLightSource*>);
 
-	UPROPERTY(Replicated)
+	UPROPERTY(BlueprintReadOnly, Replicated)
 	class UFGCircuitConnectionComponent* mSmartPanelDownstreamConnection;
 
-	UPROPERTY(Replicated, ReplicatedUsing = "OnRep_ControlPanelBuildableLightingConnections")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = "OnRep_ControlPanelBuildableLightingConnections") 
 	TArray<FBuildableLightingConnection> mBuildableLightingConnections;
 
+	UPROPERTY(BlueprintReadOnly, Replicated)
 	uint8 mBuildableLightConnectionCount = 0;
+
+	//UPROPERTY(BlueprintReadOnly, Replicated)
+	//bool isListStale = true;
 
 protected:
 

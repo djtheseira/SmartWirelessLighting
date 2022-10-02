@@ -19,7 +19,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
-ASmartLightsControlPanel::ASmartLightsControlPanel() : Super() 
+ASmartLightsControlPanel::ASmartLightsControlPanel() : Super()
 {
 	this->bReplicates = true;
 }
@@ -28,24 +28,27 @@ void ASmartLightsControlPanel::GetLifetimeReplicatedProps(TArray< FLifetimePrope
 {
 	
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
 	DOREPLIFETIME(ASmartLightsControlPanel, mBuildableLightingConnections);
 	DOREPLIFETIME(ASmartLightsControlPanel, mAvailableLightSources);
 	DOREPLIFETIME(ASmartLightsControlPanel, mSmartPanelDownstreamConnection);
+	DOREPLIFETIME(ASmartLightsControlPanel, mBuildableLightConnectionCount);
 }
 
 void ASmartLightsControlPanel::OnDismantleEffectFinished()
 {
 	Super::OnDismantleEffectFinished();
 	if (HasAuthority()) {
+		this->Server_OnDismantleEffectFinished();
 		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnDismantleEffectFinished"));
-		for (FBuildableLightingConnection LightingConnection : this->mBuildableLightingConnections)
-		{
-			if (LightingConnection.mBuildableWire && LightingConnection.isConnected)
-			{
-				LightingConnection.mBuildableWire->Destroy(true);
-				LightingConnection.mBuildableWire->TurnOffAndDestroy();
-			}
-		}
+		//for (FBuildableLightingConnection LightingConnection : this->mBuildableLightingConnections)
+		//{
+		//	if (LightingConnection.mBuildableWire && LightingConnection.isConnected)
+		//	{
+		//		LightingConnection.mBuildableWire->Destroy(true);
+		//		LightingConnection.mBuildableWire->TurnOffAndDestroy();
+		//	}
+		//}
 	}
 	else {
 		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnDismantleEffectFinished No Auth"));
@@ -65,7 +68,7 @@ void ASmartLightsControlPanel::Server_OnDismantleEffectFinished()
 			LightingConnection.mBuildableWire->TurnOffAndDestroy();
 		}
 	}
-
+	mSmartLightsControlPanelSubsystem->OnSmartWirelessLightControlPanelDestroyed();
 }
 
 void ASmartLightsControlPanel::BeginPlay()
@@ -85,6 +88,7 @@ void ASmartLightsControlPanel::BeginPlay()
 
 	if (SmartLightsControlPanelSubsystem) {
 		mSmartLightsControlPanelSubsystem = SmartLightsControlPanelSubsystem;
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::BeginPlay mSmartLightsControlPanelSubsystem %s"), mSmartLightsControlPanelSubsystem ? TEXT("YEA") : TEXT("NAH"));
 		if (HasAuthority()) {
 
 			mSmartLightsControlPanelSubsystem->GetAllLightSources();
@@ -93,7 +97,7 @@ void ASmartLightsControlPanel::BeginPlay()
 			mSmartLightsControlPanelSubsystem->OnLightSourceStateChanged.AddDynamic(this, &ASmartLightsControlPanel::RespondToLightSourceStateChange);
 		}
 	}
-	}
+}
 
 void ASmartLightsControlPanel::SetAvailableLightsForControlPanel() {
 	if (HasAuthority()) {
@@ -108,8 +112,11 @@ void ASmartLightsControlPanel::SetAvailableLightsForControlPanel() {
 }
 
 void ASmartLightsControlPanel::Server_SetAvailableLightsForControlPanel() {
-	this->SetBuildableLightConnectionCount(0);
+	//this->SetBuildableLightConnectionCount(0);
 	this->mBuildableLightingConnections = mSmartLightsControlPanelSubsystem->GetControlPanelLightSources(this);
+	this->SetBuildableLightConnectionCount(mBuildableLightingConnections.Num());
+	//isListStale = true;
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::SetAvailableLightsForControlPanel connectionsSize: %d"), mBuildableLightingConnections.Num());
 }
 
 void ASmartLightsControlPanel::AddLightConnectionToControlPanel(FBuildableLightingConnection BuildableLightingConnection) {
@@ -210,42 +217,11 @@ void ASmartLightsControlPanel::Server_RemoveLightConnectionFromControlPanel(FBui
 }
 
 TArray< FBuildableLightingConnection> ASmartLightsControlPanel::GetBuildableLightingConnections(ELightSourceType LightSourceType) {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetBuildableLightingConnections %s"), (HasAuthority() ? TEXT("HAS AUTH") : TEXT("NO AUTH")));
-	if (HasAuthority()) {
-		if (mSmartLightsControlPanelSubsystem->mBuildableLightSources.Num() != mBuildableLightConnectionCount) {
-			this->SetAvailableLightsForControlPanel();
-		}
-	}
-	else {
-		USmartWirelessLightingRemoteCallObject* rco = USmartWirelessLightingRemoteCallObject::getRCO(GetWorld());
-		//UE_LOG(LogSWL, Warning, TEXT("ASmartLightsControlPanel::GetBuildableLightingConnections nonAuthority RCO: %s"), (rco ? TEXT("YES") : TEXT("NO")));
-		 rco->SetAvailableLightsForControlPanel(this);
-		//if (GetWorld()) {
-		//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel Yes GetWorld"));
-		//	AFGPlayerController* playerController = Cast<AFGPlayerController>(GetWorld()->GetFirstPlayerController());
-		//	if (playerController) {
-		//		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel Yes playerController"));
-		//		auto testRco = playerController->GetRemoteCallObjectOfClass(USmartWirelessLightingRemoteCallObject::StaticClass());
-		//		if (testRco) {
-		//			UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel Yes testRco"));
-		//		}
-		//		else {
-		//			UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel No testRco"));
-		//		}
-		//	}
-		//	else {
-		//		UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel No playerController"));
-		//	}
-
-		//}
-		//else {
-		//	UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::AddLightConnectionToControlPanel No GetWorld"));
-		//}
-	}
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetBuildableLightingConnections mBuildableLightingConnections %d"), mBuildableLightingConnections.Num());
-	return mBuildableLightingConnections.FilterByPredicate([&LightSourceType](FBuildableLightingConnection BuildableLightingConnection) {
+	TArray<FBuildableLightingConnection> filteredLightingConnections = mBuildableLightingConnections.FilterByPredicate([&LightSourceType](FBuildableLightingConnection BuildableLightingConnection) {
 		return BuildableLightingConnection.mLightSourceType == LightSourceType;
 	});
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetBuildableLightingConnections mBuildableLightingConnections %d"), filteredLightingConnections.Num());
+	return filteredLightingConnections;
 
 	//return mBuildableLightingConnections;
 }
@@ -326,21 +302,35 @@ void ASmartLightsControlPanel::Server_UpdateLightColorSlot(uint8 slotIdx, FLinea
 
 void ASmartLightsControlPanel::RespondToBuildableLightSourceListUpdated() {
 	if (HasAuthority()) {
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RespondToBuildableLightSourceListUpdated"));
-		SetBuildableLightConnectionCount(-1);
+		this->Multicast_RespondToBuildableLightSourceListUpdated();
+	}
+}
+
+void ASmartLightsControlPanel::Multicast_RespondToBuildableLightSourceListUpdated_Implementation() {
+	if (HasAuthority()) {
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::Multicast_RespondToBuildableLightSourceListUpdated_Implementation auth"));
 		this->SetAvailableLightsForControlPanel();
-		//SetBuildableLightConnectionCount(mSmartLightsControlPanelSubsystem->mBuildableLightSources.Num());
+	}
+	else {
+		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::Multicast_RespondToBuildableLightSourceListUpdated_Implementation noauth"));
+		//SetBuildableLightConnectionCount(-1);
+		auto rco = USmartWirelessLightingRemoteCallObject::getRCO(GetWorld());
+		rco->SetAvailableLightsForControlPanel(this);
 	}
 }
 
 void ASmartLightsControlPanel::RespondToLightSourceStateChange(class ASmartLightsControlPanel* controlPanel) {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RespondToLightSourceStateChange this name %s"), *(this->GetName()));
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RespondToLightSourceStateChange controlPanel name %s"), *(controlPanel->GetName()));
 	
-	if (!this->GetName().Equals(controlPanel->GetName())) {
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::RespondToLightSourceStateChange this != controlPanel"));
-		this->SetAvailableLightsForControlPanel();
+	if (HasAuthority() && !this->GetName().Equals(controlPanel->GetName())) {
+		Multicast_RespondToLightSourceStateChange();
 	}
+}
+
+void ASmartLightsControlPanel::Multicast_RespondToLightSourceStateChange_Implementation() {
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::Multicast_RespondToLightSourceStateChange_Implementation"));
+	this->SetBuildableLightConnectionCount(-1);
+	this->SetAvailableLightsForControlPanel();
+	
 }
 
 void ASmartLightsControlPanel::RespondToLightColorSlotUpdate() {
@@ -367,6 +357,6 @@ void ASmartLightsControlPanel::SetBuildableLightConnectionCount(uint8 BuildableL
 
 void ASmartLightsControlPanel::OnRep_ControlPanelBuildableLightingConnections()
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnRep_ControlPanelBuildableLightingConnections %s"), HasAuthority() ? TEXT("auth") : TEXT("remote"));
+	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::OnRep_ControlPanelBuildableLightingConnections %s size %d "), HasAuthority() ? TEXT("auth") : TEXT("remote"), mBuildableLightingConnections.Num());
 	//mIsDirtyList = true;
 }

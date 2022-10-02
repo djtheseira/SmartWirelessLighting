@@ -71,6 +71,9 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO2|Lights")
 	void OnDismantleEffectFinishedDestroyConnections(class ASmartLightsControlPanel* ControlPanel);
 
+	//UFUNCTION(Server, Unreliable)
+	//void GetFilteredBuildableLightingConnections(class ASmartLightsControlPanel* ControlPanel, ELightSourceType LightSourceType);
+
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "SmartWirelessRCO2|Lights")
 	TArray<AFGBuildableLightSource*> mBuildableLightSources = *(new TArray<AFGBuildableLightSource*>);
 
