@@ -42,6 +42,10 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 
 # Changelog
 
+### 1.0.5
+
+   - Updated to support U7, will not work on U6.
+
 ### 1.0.4
 
    - Updated to support U6

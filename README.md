@@ -14,6 +14,10 @@ If you'd like to help this mod grow and develop, feel free to reach out to me!
 
 # Changelog
 
+### 1.0.5
+
+   - Updated to support U7, will not work on U6.
+
 ### 1.0.4
 
    - Updated to support U6
