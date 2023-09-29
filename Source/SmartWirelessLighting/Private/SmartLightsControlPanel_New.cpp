@@ -229,7 +229,7 @@ void ASmartLightsControlPanel_New::Server_UpdateControlPanelStatus(bool IsEnable
 }
 
 void ASmartLightsControlPanel_New::UpdateLightControlData(FLightSourceControlData Data) {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel_New::UpdateLightControlData"));
+	UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanel_New::UpdateLightControlData"));
 	//if (HasAuthority()) {
 	//	Server_UpdateLightControlData(Data);
 	//}

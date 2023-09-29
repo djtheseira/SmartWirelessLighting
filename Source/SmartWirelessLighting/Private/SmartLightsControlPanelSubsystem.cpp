@@ -36,14 +36,16 @@ void ASmartLightsControlPanelSubsystem::BeginPlay() {
 	Super::BeginPlay();
 	mBuildableSubsystem = AFGBuildableSubsystem::Get(GetWorld());
 	
+	/*
 	if (mBuildableSubsystem) {
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem exists"));
+		UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem exists"));
 		mBuildableSubsystem->BuildableConstructedGlobalDelegate.AddDynamic(this, &ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal);
 
 	}
 	else {
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem doesnt exist"));
+		UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem doesnt exist"));
 	}
+	*/
 
 }
 
@@ -59,8 +61,12 @@ ASmartLightsControlPanelSubsystem* ASmartLightsControlPanelSubsystem::getSubsyst
 	return SubsystemActorManager->GetSubsystemActor< ASmartLightsControlPanelSubsystem>();
 }
 
+void ASmartLightsControlPanelSubsystem::SetLightListIsDirty(bool isLightListDirty) {
+	mLightListDirty = isLightListDirty;
+}
+
 void ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal(AFGBuildable* buildable) {
-	/*UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal RespondToBuildableConstructedGlobal"));*/
+	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal RespondToBuildableConstructedGlobal"));
 
 	AFGBuildableLightSource* lightSource = Cast<AFGBuildableLightSource>(buildable);
 
@@ -136,12 +142,14 @@ void ASmartLightsControlPanelSubsystem::UpdateLightColorSlot(uint8 slotIdx, FLin
 }
 
 void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
-	//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetAllLightSources"));
+	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetAllLightSources"));
 	// Get All Buildable Light Sources here on init
 	if (HasAuthority()) {
 		mBuildableLightSources = *(new TArray<AFGBuildableLightSource*>);
 		mBuildableSubsystem->GetTypedBuildable(mBuildableLightSources);
 		mBuildableLightingConnections = *(new TArray<FBuildableLightingConnection>);
+
+		//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetAllLightSources Size: %d"), mBuildableLightSources.Num());
 		
 		for (AFGBuildableLightSource* BuildableLightSource : mBuildableLightSources) {
 			//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetControlPanelLightSources Loop Start"));
@@ -154,6 +162,7 @@ void ASmartLightsControlPanelSubsystem::GetAllLightSources() {
 			}
 
 			ELightSourceType lightSourceType = GetBuildableLightSourceType(BuildableLightSource->GetName());
+			//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::GetAllLightSources LightSource Intensity: %f"), BuildableLightSource->GetLightControlData().Intensity);
 
 			LightingConnection.mBuildablePowerConnection = LightPowerConnection;
 			LightingConnection.mBuildableLightSource = BuildableLightSource;
