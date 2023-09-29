@@ -32,8 +32,9 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 
 # Known Issues
 
-   - When connecting/disconnecting a light from a normal cable, the light list will not update. (Fix coming soon)
-   - Daisy chaining doesn't work. The SMART wireless light panel ignores a light with a connection (for now). The issue above can also cause an issue where the light either appears or disappears after a different refresh. The daisy chaining with cables issue will be addressed ASAP, but the first issue is my current priority.
+	- Intensity percentage on the lights does not match the control panel.
+	- When connecting/disconnecting a light from a normal cable, the light list will not update. (Fix coming soon)
+	- Daisy chaining doesn't work. The SMART wireless light panel ignores a light with a connection (for now). The issue above can also cause an issue where the light either appears or disappears after a different refresh. The daisy chaining with cables issue will be addressed ASAP, but the first issue is my current priority.
 
 # New Features
 
@@ -41,6 +42,10 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
    - Add ability to change names of lights like trains naming system (maybe..)
 
 # Changelog
+
+### 1.0.6
+
+   - Fixed issue where the list of lights didn't refresh after a new one was built.
 
 ### 1.0.5
 
