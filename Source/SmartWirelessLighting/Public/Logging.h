@@ -1,3 +1,3 @@
 #pragma once
 
-DECLARE_LOG_CATEGORY_EXTERN(LogSWL, Log, All)
+DECLARE_LOG_CATEGORY_EXTERN(LogSmartWirelessLighting, Verbose, All)

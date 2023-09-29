@@ -45,17 +45,17 @@ USmartWirelessLightingRemoteCallObject_New* USmartWirelessLightingRemoteCallObje
 void USmartWirelessLightingRemoteCallObject_New::SetBuildableSubsystem() {
 	AFGBuildableSubsystem* buildableSubsystem = AFGBuildableSubsystem::Get(GetWorld());
 	if (buildableSubsystem && !mBuildableSubsystem) {
-		//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::constructor buildablesubsystem exists"));
+		//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::constructor buildablesubsystem exists"));
 		mBuildableSubsystem = buildableSubsystem;
 	}
 }
 
 void USmartWirelessLightingRemoteCallObject_New::FindAllBuildableLightSources_Implementation(class ASmartLightsControlPanel_New* mControlPanel, const TArray< FBuildableLightingConnection_New>& BuildableLightingConnections)
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::FindAllBuildableLightSources"));
+	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::FindAllBuildableLightSources"));
 
 	if (mControlPanel->HasAuthority()) {
-		//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::FindAllBuildableLightSources control panel has authority"));
+		//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::FindAllBuildableLightSources control panel has authority"));
 
 
 	}
@@ -69,7 +69,7 @@ void USmartWirelessLightingRemoteCallObject_New::SetAvailableLightsForControlPan
 
 void USmartWirelessLightingRemoteCallObject_New::DebugWirelessLightingRCO(FString Location)
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::DebugWirelessLightingRCO %s"), *Location);
+	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::DebugWirelessLightingRCO %s"), *Location);
 }
 
 void USmartWirelessLightingRemoteCallObject_New::AddLightConnectionToControlPanel_Implementation(class ASmartLightsControlPanel_New* ControlPanel, FBuildableLightingConnection_New BuildableLightingConnection) {
