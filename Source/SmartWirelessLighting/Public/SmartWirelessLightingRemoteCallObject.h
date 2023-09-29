@@ -69,6 +69,12 @@ public:
 	void UpdateLightColorSlot(class ASmartLightsControlPanel* ControlPanel, uint8 slotIdx, FLinearColor NewColor);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO2|Lights")
+	void UpdateAvailableLightIsDirty(class ASmartLightsControlPanel* ControlPanel);
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO2|Lights")
+	void UpdateAvailableLights(class ASmartLightsControlPanel* ControlPanel);
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "SmartWirelessRCO2|Lights")
 	void OnDismantleEffectFinishedDestroyConnections(class ASmartLightsControlPanel* ControlPanel);
 
 	//UFUNCTION(Server, Unreliable)
