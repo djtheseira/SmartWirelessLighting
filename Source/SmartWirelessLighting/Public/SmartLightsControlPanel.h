@@ -115,6 +115,14 @@ public:
 	void UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
 	void Server_UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
 
+	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel|LightPanel")
+	void UpdateAvailableLightListIsDirty();
+	void Server_UpdateAvailableLightListIsDirty();
+	
+	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel|LightPanel")
+	void UpdateAvailableLightList();
+	void Server_UpdateAvailableLightList();
+
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_RespondToBuildableLightSourceListUpdated();
 
