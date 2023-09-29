@@ -1,3 +1,3 @@
 #include "Logging.h"
 
-DEFINE_LOG_CATEGORY(LogSWL)
+DEFINE_LOG_CATEGORY(LogSmartWirelessLighting)
