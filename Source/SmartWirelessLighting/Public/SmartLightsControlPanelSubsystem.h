@@ -74,6 +74,8 @@ public:
 
 	bool mLightListDirty = false;
 
+	void SetLightListIsDirty(bool isLightListDirty);
+
 	AFGBuildableWire* GetControlPanelToLightWire(class UFGPowerConnectionComponent* PowerConnection, class UFGCircuitConnectionComponent* ControlPanelDownstreamConnection)
 	{
 		TArray< class AFGBuildableWire* >& ConnectedWires = *(new TArray<class AFGBuildableWire*>);
@@ -114,7 +116,7 @@ public:
 		UFGPowerConnectionComponent* PowerConnection = Cast<UFGPowerConnectionComponent>(BuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
 
 		if (!PowerConnection) return nullptr;
-		//UE_LOG(LogSWL, Warning, TEXT(".ASmartLightsControlPanel::GetLightSourcePowerConnectionComponent %s LightPowerConnection %s"), *(BuildableLightSource->GetName()), (PowerConnection ? TEXT("Has PowerConnection") : TEXT("No PowerConnection")));
+		//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanel::GetLightSourcePowerConnectionComponent %s LightPowerConnection %s"), *(BuildableLightSource->GetName()), (PowerConnection ? TEXT("Has PowerConnection") : TEXT("No PowerConnection")));
 		return PowerConnection;
 
 
