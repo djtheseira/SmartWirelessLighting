@@ -45,25 +45,25 @@ USmartWirelessLightingRemoteCallObject* USmartWirelessLightingRemoteCallObject::
 void USmartWirelessLightingRemoteCallObject::SetBuildableSubsystem() {
 	AFGBuildableSubsystem* buildableSubsystem = AFGBuildableSubsystem::Get(GetWorld());
 	if (buildableSubsystem && !mBuildableSubsystem) {
-		//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::constructor buildablesubsystem exists"));
+		//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::constructor buildablesubsystem exists"));
 		mBuildableSubsystem = buildableSubsystem;
 	}
 }
 
 void USmartWirelessLightingRemoteCallObject::FindAllBuildableLightSources_Implementation(class ASmartLightsControlPanel* mControlPanel, const TArray< FBuildableLightingConnection>& BuildableLightingConnections)
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::FindAllBuildableLightSources"));
+	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::FindAllBuildableLightSources"));
 
 	if (mControlPanel->HasAuthority()) {
-		//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::FindAllBuildableLightSources control panel has authority"));
+		//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".USmartWirelessLightingRemoteCallObject2::FindAllBuildableLightSources control panel has authority"));
 
 
 	}
 }
 
 void USmartWirelessLightingRemoteCallObject::SetAvailableLightsForControlPanel_Implementation(class ASmartLightsControlPanel* mControlPanel) {
-	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::SetAvailableLightsForControlPanel_Implementation mControlPanel exists: %s"), (mControlPanel ? TEXT("YES") : TEXT("NO")));
-	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::SetAvailableLightsForControlPanel_Implementation mControlPanel hasAuth: %s"), (mControlPanel->HasAuthority() ? TEXT("YES") : TEXT("NO")));
+	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::SetAvailableLightsForControlPanel_Implementation mControlPanel exists: %s"), (mControlPanel ? TEXT("YES") : TEXT("NO")));
+	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::SetAvailableLightsForControlPanel_Implementation mControlPanel hasAuth: %s"), (mControlPanel->HasAuthority() ? TEXT("YES") : TEXT("NO")));
 	if (mControlPanel->HasAuthority()) {
 		mControlPanel->Server_SetAvailableLightsForControlPanel();
 	}
@@ -71,7 +71,7 @@ void USmartWirelessLightingRemoteCallObject::SetAvailableLightsForControlPanel_I
 
 void USmartWirelessLightingRemoteCallObject::DebugWirelessLightingRCO(FString Location)
 {
-	//UE_LOG(LogSWL, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::DebugWirelessLightingRCO %s"), *Location);
+	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".USmartWirelessLightingRemoteCallObject::DebugWirelessLightingRCO %s"), *Location);
 }
 
 void USmartWirelessLightingRemoteCallObject::AddLightConnectionToControlPanel_Implementation(class ASmartLightsControlPanel* ControlPanel, FBuildableLightingConnection BuildableLightingConnection) {
@@ -103,6 +103,19 @@ void USmartWirelessLightingRemoteCallObject::UpdateLightColorSlot_Implementation
 		ControlPanel->Server_UpdateLightColorSlot(slotIdx, NewColor);
 	}
 }
+
+void USmartWirelessLightingRemoteCallObject::UpdateAvailableLightIsDirty_Implementation(class ASmartLightsControlPanel* ControlPanel) {
+	if (ControlPanel->HasAuthority()) {
+		ControlPanel->Server_UpdateAvailableLightListIsDirty();
+	}
+}
+
+void USmartWirelessLightingRemoteCallObject::UpdateAvailableLights_Implementation(class ASmartLightsControlPanel* ControlPanel) {
+	if (ControlPanel->HasAuthority()) {
+		ControlPanel->Server_UpdateAvailableLightList();
+	}
+}
+	
 
 void USmartWirelessLightingRemoteCallObject::OnDismantleEffectFinishedDestroyConnections_Implementation(class ASmartLightsControlPanel* ControlPanel) {
 	if (ControlPanel->HasAuthority()) {
