@@ -15,6 +15,7 @@
 #include "FGPowerCircuit.h"
 #include "FGPowerInfoComponent.h"
 #include "Buildables/FGBuildable.h"
+#include "Buildables/FGBuildableLightsControlPanel.h"
 #include "Buildables/FGBuildableLightSource.h"
 #include "Subsystem/SubsystemActorManager.h"
 
@@ -36,16 +37,16 @@ void ASmartLightsControlPanelSubsystem::BeginPlay() {
 	Super::BeginPlay();
 	mBuildableSubsystem = AFGBuildableSubsystem::Get(GetWorld());
 	
-	/*
-	if (mBuildableSubsystem) {
+	
+	/*if (mBuildableSubsystem) {
 		UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem exists"));
 		mBuildableSubsystem->BuildableConstructedGlobalDelegate.AddDynamic(this, &ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal);
 
 	}
 	else {
 		UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::BeginPlay buildablesubsystem doesnt exist"));
-	}
-	*/
+	}*/
+	
 
 }
 
@@ -66,7 +67,7 @@ void ASmartLightsControlPanelSubsystem::SetLightListIsDirty(bool isLightListDirt
 }
 
 void ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal(AFGBuildable* buildable) {
-	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal RespondToBuildableConstructedGlobal"));
+	UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal RespondToBuildableConstructedGlobal"));
 
 	AFGBuildableLightSource* lightSource = Cast<AFGBuildableLightSource>(buildable);
 
@@ -77,7 +78,13 @@ void ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal(AFGB
 		AddNewLightSource(lightSource);
 		mLightListDirty = true;
 		OnBuildableLightSourceStateChanged.Broadcast();
+		lightSource->OnBuildableLightSourceStateChanged.AddDynamic(this, &ASmartLightsControlPanelSubsystem::RespondToPanelDataChanged);
 	}
+
+}
+
+void ASmartLightsControlPanelSubsystem::RespondToPanelDataChanged(bool isEnabled) {
+	UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanelSubsystem::RespondToBuildableConstructedGlobal RespondToPanelDataChanged"));
 }
 
 void ASmartLightsControlPanelSubsystem::RespondToLightSourceDestroyed(AActor* DestroyedActor) {
