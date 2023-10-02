@@ -177,7 +177,6 @@ void ASmartLightsControlPanel::Server_AddLightConnectionToControlPanel(FBuildabl
 	BuildableLightingConnection.mBuildablePowerConnection = Cast<UFGPowerConnectionComponent>(BuildableLightingConnection.mBuildableLightSource->GetComponentByClass(UFGPowerConnectionComponent::StaticClass()));
 		//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanel::Server_AddLightConnectionToControlPanel %s LightPowerConnection %s"), *(BuildableLightingConnection.mBuildableLightSource->GetName()), (BuildableLightingConnection.mBuildablePowerConnection ? TEXT("Has PowerConnection") : TEXT("No PowerConnection")));
 	//}
-
 	ABuild_SmartWirelessWireBase* NewBuildableWire = GetWorld()->SpawnActor<ABuild_SmartWirelessWireBase>(ABuild_SmartWirelessWireBase::StaticClass(), FTransform(BuildableLightingConnection.mBuildablePowerConnection->GetRelativeLocation()));
 	int32 BuildableConnectionIndex = mBuildableLightingConnections.Find(BuildableLightingConnection);
 	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanel::Server_AddLightConnectionToControlPanel Index: %d"), BuildableConnectionIndex);
@@ -321,19 +320,7 @@ void ASmartLightsControlPanel::UpdateLightControlData(FLightSourceControlData Da
 void ASmartLightsControlPanel::Server_UpdateLightControlData(FLightSourceControlData Data) {
 	//UE_LOG(LogSmartWirelessLighting, Verbose, TEXT(".ASmartLightsControlPanel::Server_UpdateControlPanelStatus Data: %f"), Data.Intensity);
 	//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanel::Server_UpdateControlPanelStatus Data: %f"), Data.ColorSlotIndex);
-	Super::SetLightControlData(Data);
-
-	TSubclassOf< AFGBuildable > output = AFGBuildableLightSource::StaticClass();
-	TArray<AFGBuildable*> BuildableLightSources = GetControlledBuildables(output);
-	
-
-	for (AFGBuildable* Buildable : BuildableLightSources) {
-		AFGBuildableLightSource* lightSource = Cast<AFGBuildableLightSource>(Buildable);
-		if (lightSource) {
-			lightSource->SetLightControlData(Data);
-			//UE_LOG(LogSmartWirelessLighting, Warning, TEXT(".ASmartLightsControlPanel::Server_UpdateControlPanelStatus LightSource Intensity: %f"), lightSource->GetLightControlData().Intensity);
-		}
-	}
+	Super::SetLightDataOnControlledLights(Data);
 
 }
 
