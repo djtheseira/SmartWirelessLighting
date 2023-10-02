@@ -14,6 +14,11 @@ If you'd like to help this mod grow and develop, feel free to reach out to me!
 
 # Changelog
 
+### 1.0.6
+
+   - Fix issue where the list of lights didn't refresh after a new one was built.
+   - Fix issue where intensity percentage on the connected lights did not match the control panel.
+
 ### 1.0.5
 
    - Updated to support U7, will not work on U6.
