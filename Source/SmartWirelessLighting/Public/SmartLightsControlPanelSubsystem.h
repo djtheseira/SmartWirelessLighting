@@ -5,6 +5,7 @@
 #include "FGBuildableSubsystem.h"
 #include "FGCharacterPlayer.h"
 #include "Buildables/FGBuildable.h"
+#include "Buildables/FGBuildableLightsControlPanel.h"
 #include "Buildables/FGBuildableLightSource.h"
 #include "SmartLightsControlPanel.h"
 #include "SmartLightsControlPanelSubsystem.generated.h"
@@ -39,6 +40,9 @@ public:
 
 	UFUNCTION()
 	void RespondToBuildableDismanted();
+
+	UFUNCTION()
+	void RespondToPanelDataChanged(bool isEnabled);
 
 	UFUNCTION()
 	void RespondToBuildableConstructedGlobal(AFGBuildable* buildable);
