@@ -1,34 +1,36 @@
 {
-  "FileVersion": 3,
-  "Version": 1,
-  "SemVersion": "1.0.6",
-  "VersionName": "1.0.6",
-  "FriendlyName": "Smart Wireless Lighting",
-  "Description": "Smart Wireless Lighting that allows control of the built-in lights from CSS. Connect and disconnect the different lights directly from the Wireless Lights Control Panel.",
-  "Category": "Modding",
-  "CreatedBy": "iamcrouton",
-  "CreatedByURL": "https://github.com/djtheseira",
-  "DocsURL": "https://github.com/djtheseira/SmartWirelessLighting",
-  "MarketplaceURL": "",
-  "SupportURL": "https://github.com/djtheseira/SmartWirelessLighting/issues",
-  "CanContainContent": true,
-  "IsBetaVersion": false,
-  "IsExperimentalVersion": false,
-  "Installed": false,
-  "AcceptsAnyRemoteVersion": false,
-  "Modules": [
-    {
-      "Name": "SmartWirelessLighting",
-      "Type": "Runtime",
-      "LoadingPhase": "PostDefault"
-    }
-  ],
-  "Plugins": [
-    {
-      "Name": "SML",
-      "SemVersion": "^3.4.1",
-      "bIsOptional": false,
-      "Enabled": true
-    }
-  ]
+	"FileVersion": 3,
+	"Version": 1,
+	"SemVersion": "1.0.7",
+	"VersionName": "1.0.7",
+	"FriendlyName": "Smart Wireless Lighting",
+	"Description": "Smart Wireless Lighting that allows control of the built-in lights from CSS. Connect and disconnect the different lights directly from the Wireless Lights Control Panel.",
+	"Category": "Modding",
+	"CreatedBy": "iamcrouton",
+	"CreatedByURL": "https://github.com/djtheseira",
+	"DocsURL": "https://github.com/djtheseira/SmartWirelessLighting",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/djtheseira/SmartWirelessLighting/issues",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"AcceptsAnyRemoteVersion": false,
+	"Modules": [
+		{
+			"Name": "SmartWirelessLighting",
+			"Type": "Runtime",
+			"LoadingPhase": "PostDefault"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "SML",
+			"SemVersion": "^3.6.0",
+			"bIsOptional": false,
+			"Enabled": true,
+			"BasePlugin": false
+		}
+	],
+	"RemoteVersionRange": ""
 }
