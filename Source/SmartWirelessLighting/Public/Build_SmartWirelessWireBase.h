@@ -1,8 +1,6 @@
 // ILikeBanas
 
 #pragma once
-
-#include "CoreMinimal.h"
 #include "FGCharacterPlayer.h"
 #include "Buildables/FGBuildableWire.h"
 #include "Build_SmartWirelessWireBase.generated.h"
@@ -25,6 +23,6 @@ public:
 	
 	// Begin IFGDismantleInterface
 	//virtual void Dismantle_Implementation() override;
-	virtual void GetDismantleRefund_Implementation(TArray< FInventoryStack >& out_refund) const override;
+	virtual void GetDismantleRefund_Implementation(TArray< FInventoryStack >& out_refund, bool noBuildCostEnabled) const override;
 	// End IFGDismantleInterface
 };

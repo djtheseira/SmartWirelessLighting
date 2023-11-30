@@ -27,4 +27,4 @@ void ABuild_SmartWirelessWireBase::Serialize(FArchive& ar) { Super::Serialize(ar
 void ABuild_SmartWirelessWireBase::BeginPlay() { Super::BeginPlay(); }
 //void ABuild_SmartWirelessWireBase::Destroyed() { }
 //void ABuild_SmartWirelessWireBase::Dismantle_Implementation() { }
-void ABuild_SmartWirelessWireBase::GetDismantleRefund_Implementation(TArray< FInventoryStack >& out_refund) const { }
+void ABuild_SmartWirelessWireBase::GetDismantleRefund_Implementation(TArray< FInventoryStack >& out_refund, bool noBuildCostEnabled) const { }
