@@ -1,6 +1,8 @@
 using UnrealBuildTool;
 using System.IO;
 using System;
+using System.Diagnostics;
+using EpicGames.Core;
 
 public class SmartWirelessLighting : ModuleRules
 {
@@ -12,19 +14,30 @@ public class SmartWirelessLighting : ModuleRules
         PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject",
             "Engine",
+            "DeveloperSettings",
+            "PhysicsCore",
             "InputCore",
-            "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemNULL",
+            "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemNull",
             "SignificanceManager",
-            "PhysX", "APEX", "PhysXVehicles", "ApexDestruction",
-            "AkAudio",
-            "ReplicationGraph",
-            "UMG",
-            "AIModule",
-            "NavigationSystem",
-            "AssetRegistry",
-            "GameplayTasks",
+            "GeometryCollectionEngine",
+            "ChaosVehiclesCore", "ChaosVehicles", "ChaosSolverEngine",
             "AnimGraphRuntime",
-            "Slate", "SlateCore",
+            "AkAudio",
+            "AssetRegistry",
+            "NavigationSystem",
+            "ReplicationGraph",
+            "AIModule",
+            "GameplayTasks",
+            "SlateCore", "Slate", "UMG",
+            "RenderCore",
+            "CinematicCamera",
+            "Foliage",
+            "Niagara",
+            "EnhancedInput",
+            "GameplayCameras",
+            "TemplateSequence",
+            "NetCore",
+            "GameplayTags",
             "Json"
             });
 
@@ -38,6 +51,7 @@ public class SmartWirelessLighting : ModuleRules
             PublicDependencyModuleNames.Add("UnrealEd");
             PrivateDependencyModuleNames.Add("MainFrame");
         }
+
         PublicDependencyModuleNames.AddRange(new string[] {"FactoryGame", "SML"});
     }
 }
