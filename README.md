@@ -14,6 +14,10 @@ If you'd like to help this mod grow and develop, feel free to reach out to me!
 
 # Changelog
 
+### 1.0.7
+
+   - Updated to support U8!
+
 ### 1.0.6
 
    - Fix issue where the list of lights didn't refresh after a new one was built.
