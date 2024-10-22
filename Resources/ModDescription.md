@@ -42,6 +42,11 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 
 # Changelog
 
+### 1.0.8
+
+   - 1.0 SUPPORT!!
+   - Fixed multiplayer/dedicated server issues.
+
 ### 1.0.7
 
    - Updated to support U8!
