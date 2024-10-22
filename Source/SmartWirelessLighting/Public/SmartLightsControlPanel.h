@@ -86,77 +86,35 @@ public:
 	virtual void BeginPlay() override;
 	// End Actor Interface
 
-	//~ Begin IFGDismantleInterface
-	virtual void OnDismantleEffectFinished() override;
-	void Server_OnDismantleEffectFinished();
-	//~ End IFGDismantleInterface
-
-	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel|LightPanel")
-	void SetAvailableLightsForControlPanel();
-	void Server_SetAvailableLightsForControlPanel();
-
-	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel|LightPanel")
+	UFUNCTION(BlueprintCallable, Category = "SWL|Control Panel")
 	void AddLightConnectionToControlPanel(FBuildableLightingConnection BuildableLightingConnection);
-	void Server_AddLightConnectionToControlPanel(FBuildableLightingConnection BuildableLightingConnection);
 
-	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel|LightPanel")
-	void RemoveLightConnectionFromControlPanel(FBuildableLightingConnection BuildableLightingConnection);
-	void Server_RemoveLightConnectionFromControlPanel(FBuildableLightingConnection BuildableLightingConnection);
+	UFUNCTION(BlueprintCallable, Category = "SWL|Control Panel")
+	void RemoveLightConnectionFromControlPanel(FBuildableLightingConnection BuildableLightingConnection, class ASmartLightsControlPanelSubsystem* SmartLightsControlPanelSubsystem);
 
-	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel|LightPanel")
+	UFUNCTION(BlueprintCallable, Category = "SWL|Control Panel")
 	void UpdateControlPanelStatus(bool IsEnabled);
-	void Server_UpdateControlPanelStatus(bool IsEnabled);
 
-	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel|LightPanel")
+	UFUNCTION(BlueprintCallable, Category = "SWL|Control Panel")
 	void UpdateLightControlData(FLightSourceControlData Data);
-	void Server_UpdateLightControlData(FLightSourceControlData Data);
-
-	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel|LightPanel")
-	void UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
-	void Server_UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
-
-	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel|LightPanel")
-	void UpdateAvailableLightListIsDirty();
-	void Server_UpdateAvailableLightListIsDirty();
-	
-	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel|LightPanel")
-	void UpdateAvailableLightList();
-	void Server_UpdateAvailableLightList();
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_RespondToBuildableLightSourceListUpdated();
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_RespondToLightSourceStateChange();
-
-	UFUNCTION()
-	void RespondToBuildableLightSourceListUpdated();
-
-	UFUNCTION()
-	void RespondToLightSourceStateChange(class ASmartLightsControlPanel* controlPanel);
 	
 	UFUNCTION()
 	void RespondToLightColorSlotUpdate();
 
-	void SetBuildableLightConnectionCount(uint8 BuildableLightConnectionCount);
-
-	UFUNCTION(BlueprintCallable, Category = "New_WirelessLightsControlPanel", DisplayName = "GetBuildableLightingConnections")
+	UFUNCTION(BlueprintCallable, Category = "SWL|Control Panel", DisplayName = "GetBuildableLightingConnections")
 	TArray< FBuildableLightingConnection> GetBuildableLightingConnections(ELightSourceType LightSourceType);
 
-	UPROPERTY(BlueprintReadOnly, Replicated, BlueprintReadOnly, Category = "SmartWirelessLighting2", DisplayName = "Buildable Light Sources")
+	UPROPERTY(BlueprintReadOnly, Replicated, BlueprintReadOnly, Category = "SWL|Control Panel", DisplayName = "Buildable Light Sources")
 	TArray<AFGBuildableLightSource*> mAvailableLightSources = *(new TArray<AFGBuildableLightSource*>);
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	class UFGCircuitConnectionComponent* mSmartPanelDownstreamConnection;
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = "OnRep_ControlPanelBuildableLightingConnections") 
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = "OnRep_ControlPanelBuildableLightingConnections", Category = "SWL|Control Panel")
 	TArray<FBuildableLightingConnection> mBuildableLightingConnections;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	uint8 mBuildableLightConnectionCount = 0;
-
-	//UPROPERTY(BlueprintReadOnly, Replicated)
-	//bool isListStale = true;
 
 protected:
 

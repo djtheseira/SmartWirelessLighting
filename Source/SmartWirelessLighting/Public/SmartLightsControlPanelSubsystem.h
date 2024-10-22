@@ -4,6 +4,7 @@
 #include "Subsystem/ModSubsystem.h"
 #include "FGBuildableSubsystem.h"
 #include "FGCharacterPlayer.h"
+#include "FGPowerCircuit.h"
 #include "Buildables/FGBuildable.h"
 #include "Buildables/FGBuildableLightsControlPanel.h"
 #include "Buildables/FGBuildableLightSource.h"
@@ -33,53 +34,45 @@ public:
 
 	static ASmartLightsControlPanelSubsystem* getSubsystem(UWorld* world);
 
-	UFUNCTION(BlueprintCallable, Category = "SmartWirelessLighting2", DisplayName = "Get SWL RCO New")
+	UFUNCTION(BlueprintCallable, Category = "SWL|Subsystem", DisplayName = "Get SWL RCO New")
 	static ASmartLightsControlPanelSubsystem* getSubsystem(AActor* actor) {
 		return getSubsystem(actor->GetWorld());
 	}
 
-	UFUNCTION()
-	void RespondToBuildableDismanted();
+	UFUNCTION(BlueprintCallable, Category = "SWL|Subsystem")
+	void InitializeAvailableLightList();
+
+	UFUNCTION(BlueprintCallable, Category="SWL|Subsystem")
+	TArray<FBuildableLightingConnection> GetAvailableLightListForControlPanel(ASmartLightsControlPanel* ControlPanel);
+
+	UFUNCTION(BlueprintCallable, Category = "SWL|Subsystem")
+	void AddNewLightSource(AFGBuildableLightSource* LightSource);
+
+	UFUNCTION(BlueprintCallable, Category = "SWL|Subsystem")
+	void RemoveDestroyedLightSource(AFGBuildableLightSource* LightSource);
 
 	UFUNCTION()
 	void RespondToPanelDataChanged(bool isEnabled);
 
 	UFUNCTION()
-	void RespondToBuildableConstructedGlobal(AFGBuildable* buildable);
-
-	UFUNCTION()
 	void RespondToLightSourceDestroyed(AActor* DestroyedActor);
 
-	void AddNewLightSource(AFGBuildableLightSource* LightSource);
-	void RemoveDestroyedLightSource(const AFGBuildableLightSource* LightSource);
 	void UpdateLightColorSlot(uint8 slotIdx, FLinearColor NewColor);
 	void OnControlPanelToLightConnectionUpdate(class ASmartLightsControlPanel* controlPanel);
 	void OnSmartWirelessLightControlPanelDestroyed();
 
 	void GetAllLightSources();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
+	void RespondToBuildableConstructedGlobal(AFGBuildable* buildable);
+
+	UFUNCTION(BlueprintCallable, Category = "SWL|Subsystem")
 	TArray< FBuildableLightingConnection> GetControlPanelLightSources(ASmartLightsControlPanel* ControlPanel);
 
-	UPROPERTY(BlueprintReadOnly, Category = "SmartWirelessLighting2", DisplayName = "BuildableSubsystem")
-	class AFGBuildableSubsystem* mBuildableSubsystem;
+	UFUNCTION(BlueprintCallable, Category = "SWL|Subsystem")
+	TArray< class UFGCircuitConnectionComponent* >GetAllCircuitConnections(UFGPowerConnectionComponent* LightPowerConnection);
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "SmartWirelessLighting2", DisplayName = "Buildable Light Sources")
-	TArray<AFGBuildableLightSource*> mBuildableLightSources = *(new TArray<AFGBuildableLightSource*>);
-
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "SmartWirelessLighting2", DisplayName = "Buildable Light Sources")
-	TArray<FBuildableLightingConnection> mBuildableLightingConnections = *(new TArray<FBuildableLightingConnection>);
-
-	UPROPERTY(BlueprintAssignable, Category = "SmartWirelessLighting2")
-	FBuildableLightSourceListUpdated OnBuildableLightSourceStateChanged;
-
-	UPROPERTY(BlueprintAssignable, Category = "SmartWirelessLighting2")
-	FBuildableLightSourceChanged OnLightSourceStateChanged;
-
-	bool mLightListDirty = false;
-
-	void SetLightListIsDirty(bool isLightListDirty);
-
+	UFUNCTION(BlueprintCallable, Category = "SWL|Subsystem")
 	AFGBuildableWire* GetControlPanelToLightWire(class UFGPowerConnectionComponent* PowerConnection, class UFGCircuitConnectionComponent* ControlPanelDownstreamConnection)
 	{
 		TArray< class AFGBuildableWire* >& ConnectedWires = *(new TArray<class AFGBuildableWire*>);
@@ -92,6 +85,9 @@ public:
 		}
 		return nullptr;
 	}
+
+	UFUNCTION(BlueprintCallable, Category = "SWL|Subsystem")
+	bool IsLightPowerCircuitToLightsControlPanel(class UFGPowerCircuit* PowerCircuit);
 
 	bool IsLightConnectedToLightsControlPanel(class UFGPowerConnectionComponent* PowerConnection)
 	{
@@ -114,6 +110,7 @@ public:
 		return HasConnectionToControlPanel;
 	}
 
+	UFUNCTION(BlueprintCallable, Category = "SWL|Subsystem")
 	UFGPowerConnectionComponent* GetLightSourcePowerConnectionComponent(AFGBuildableLightSource* BuildableLightSource) {
 
 		if (!BuildableLightSource) return nullptr;
@@ -127,7 +124,30 @@ public:
 		return nullptr;
 	}
 
+	UPROPERTY(BlueprintReadOnly, Category = "SWL|Subsystem", DisplayName = "BuildableSubsystem")
+	class AFGBuildableSubsystem* mBuildableSubsystem;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "SWL|Subsystem", DisplayName = "Buildable Light Sources")
+	TArray<AFGBuildableLightSource*> mBuildableLightSources = *(new TArray<AFGBuildableLightSource*>);
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "SWL|Subsystem", DisplayName = "Buildable Lighting Connections")
+	TArray<FBuildableLightingConnection> mBuildableLightingConnections = *(new TArray<FBuildableLightingConnection>);
+
+	UPROPERTY(BlueprintAssignable, Category = "SWL|Subsystem")
+	FBuildableLightSourceListUpdated OnBuildableLightSourceStateChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "SWL|Subsystem")
+	FBuildableLightSourceChanged OnLightSourceStateChanged;
+
+	// Probably Deprecated
+	bool mLightListDirty = false;
+
+	// Probably Deprecated
+	void SetLightListIsDirty(bool isLightListDirty);
+
 private:
+
+	//FBuildableLightingConnection CreateBuildableLightingConnection(AFGBuildableLightSource* BuildableLightSource);
 
 	ELightSourceType GetBuildableLightSourceType(FString LightSourceName)
 	{
