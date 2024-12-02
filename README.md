@@ -14,6 +14,10 @@ If you'd like to help this mod grow and develop, feel free to reach out to me!
 
 # Changelog
 
+### 1.0.9
+
+   - Update version dependency.
+   
 ### 1.0.8
 
    - 1.0 SUPPORT!! 

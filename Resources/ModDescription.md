@@ -42,6 +42,10 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 
 # Changelog
 
+### 1.0.9
+
+   - Update version dependency.
+
 ### 1.0.8
 
    - 1.0 SUPPORT!!
