@@ -9,6 +9,7 @@ public class SmartWirelessLighting : ModuleRules
     public SmartWirelessLighting(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        CppStandard = CppStandardVersion.Cpp20;
         bLegacyPublicIncludePaths = false;
 
         PublicDependencyModuleNames.AddRange(new string[] {
