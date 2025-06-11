@@ -42,6 +42,10 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 
 # Changelog
 
+### 1.0.10
+
+   - Updated to Support 1.1! :) Enjoy!
+
 ### 1.0.9
 
    - Update version dependency.
@@ -132,6 +136,11 @@ Smart Wireless Lighting takes advantage of the Lighting network from Satisfactor
 # Warning
 
 This mod, just like most other mods, may cause issues with save games. Due to the overall connections between this mod and the built-in fuctionalities from CSS, whenever a major update to the lighting system happens, it can cause loading issues for your world. If you have any issues or bugs related to this mod, please tag me @crouton on discord or create an issue on GitHub describing the problem IMMEDIATELY.
+
+# Stats
+2025-06-10
+Views: 2,681,691
+Downloads: 43,757
 
 # Contributors
 
